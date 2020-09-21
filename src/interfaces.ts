@@ -6,6 +6,16 @@ export interface SmallWalletBonus {
     percentage: BigNumber;
 }
 
+export interface SmallWalletBonusConfig {
+    walletLimit: number;
+    percentage: number;
+}
+
+export interface AdminShareConfig {
+    percentage: number;
+    vendorField?: string;
+}
+
 export interface DatabaseConfig {
     user: string;
     host: string;

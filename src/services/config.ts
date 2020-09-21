@@ -1,7 +1,13 @@
 import BigNumber from "bignumber.js";
 import dotenv from "dotenv";
 import { ARKTOSHI } from "../constants";
-import { Node, Receiver, SmallWalletBonus } from "../interfaces";
+import {
+    AdminShareConfig,
+    Node,
+    Receiver,
+    SmallWalletBonus,
+    SmallWalletBonusConfig,
+} from "../interfaces";
 
 dotenv.config();
 
@@ -51,8 +57,8 @@ export class Config {
     constructor() {
         this.delegate = process.env.DELEGATE
             ? process.env.DELEGATE.toLowerCase().trim()
-            : null;
-        if (this.delegate === null || this.delegate === "") {
+            : "";
+        if (this.delegate === "") {
             throw new TypeError("Invalid DELEGATE configuration");
         }
 
@@ -142,7 +148,7 @@ export class Config {
 
         this.endAtBlockHeight = process.env.END_BLOCK_HEIGHT
             ? parseInt(process.env.END_BLOCK_HEIGHT, 10)
-            : null;
+            : Number.NaN;
         if (
             Number.isInteger(this.endAtBlockHeight) &&
             this.endAtBlockHeight <= this.startFromBlockHeight
@@ -218,17 +224,17 @@ export class Config {
             ? this.processAdmins(JSON.parse(process.env.ADMIN_PAYOUT_LIST))
             : [];
 
-        this.seed = process.env.SECRET ? process.env.SECRET : null;
+        this.seed = process.env.SECRET ? process.env.SECRET : "";
         this.secondPassphrase = process.env.SECOND_SECRET
             ? process.env.SECOND_SECRET
-            : null;
+            : "";
 
         this.businessSeed = process.env.BUSINESS_SECRET
             ? process.env.BUSINESS_SECRET
-            : null;
+            : "";
         this.businessSecondPassphrase = process.env.BUSINESS_SECOND_SECRET
             ? process.env.BUSINESS_SECOND_SECRET
-            : null;
+            : "";
 
         this.transactionsPerRequest = process.env.MAX_TRANSACTIONS_PER_REQUEST
             ? parseInt(process.env.MAX_TRANSACTIONS_PER_REQUEST, 10)
@@ -239,7 +245,9 @@ export class Config {
             : 64;
     }
 
-    public processSmallWalletBonus(smallWalletBonusConfig): SmallWalletBonus {
+    public processSmallWalletBonus(
+        smallWalletBonusConfig: SmallWalletBonusConfig
+    ): SmallWalletBonus {
         if (
             !smallWalletBonusConfig.hasOwnProperty("walletLimit") ||
             !smallWalletBonusConfig.hasOwnProperty("percentage")
@@ -265,21 +273,25 @@ export class Config {
         return smallWalletBonus;
     }
 
-    public processAdmins(admins): Receiver[] {
+    public processAdmins(admins: Record<string, AdminShareConfig>): Receiver[] {
         const receivers: Receiver[] = [];
         let totalPercentage = new BigNumber(0);
-        for (const wallet in admins) {
-            if (admins.hasOwnProperty(wallet)) {
+
+        for (const admin in admins) {
+            if (admins.hasOwnProperty(admin)) {
+                const percentage: BigNumber = admins[admin].hasOwnProperty(
+                    "percentage"
+                )
+                    ? new BigNumber(admins[admin].percentage)
+                    : new BigNumber(1);
                 const receiver: Receiver = {
-                    percentage: admins[wallet].hasOwnProperty("percentage")
-                        ? new BigNumber(admins[wallet].percentage)
-                        : new BigNumber(1),
-                    vendorField: admins[wallet].hasOwnProperty("vendorField")
-                        ? admins[wallet].vendorField
+                    percentage,
+                    vendorField: admins[admin].hasOwnProperty("vendorField")
+                        ? admins[admin].vendorField
                         : this.vendorFieldAdmin,
-                    wallet,
+                    wallet: admin,
                 };
-                totalPercentage = totalPercentage.plus(receiver.percentage);
+                totalPercentage = totalPercentage.plus(percentage);
                 if (totalPercentage.gt(1)) {
                     throw new TypeError("Admin payout percentage exceeds 100%");
                 }
