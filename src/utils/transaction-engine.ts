@@ -200,15 +200,13 @@ export class TransactionEngine {
             milestone.multiPaymentLimit
         );
 
-        //todo
-        logger.warn(`NONCE: ${this.nonce}`);
-        if (this.nonce === Number.NaN) {
+        if (Number.isNaN(this.nonce)) {
             this.nonce = await this.network.getNonceForDelegate(
                 this.config.delegate
             );
         }
 
-        if (this.businessNonce === Number.NaN && this.config.businessSeed !== "") {
+        if (Number.isNaN(this.businessNonce) && this.config.businessSeed !== "") {
             const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.businessSeed
             );
