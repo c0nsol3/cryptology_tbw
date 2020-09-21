@@ -587,7 +587,7 @@ export class TrueBlockWeightEngine {
         const votersBalancePerForgedBlock: Map<
             number,
             Map<string, BigNumber>
-        > = new Map(forgedBlocks.map((block) => [block.height, null]));
+        > = new Map(forgedBlocks.map((block) => [block.height, new Map()]));
 
         forgedBlocks.forEach((block: ForgedBlock) => {
             if (Number.isNaN(previousHeight)) {
@@ -595,11 +595,13 @@ export class TrueBlockWeightEngine {
             }
 
             const timestamp = timestampPerForgedBlock.get(block.height);
-            maxTimestamp = minTimestamp;
-            minTimestamp = timestamp.minus(1);
+            if(timestamp) {
+                maxTimestamp = minTimestamp;
+                minTimestamp = timestamp.minus(1);
 
-            if (maxTimestamp.eq(0)) {
-                maxTimestamp = timestamp;
+                if (maxTimestamp.eq(0)) {
+                    maxTimestamp = timestamp;
+                }
             }
 
             calculatedVoters = this.mutateVotersBalances(
