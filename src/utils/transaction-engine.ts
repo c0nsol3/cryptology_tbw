@@ -58,6 +58,8 @@ export class TransactionEngine {
                     i + this.config.transactionsPerMultitransfer
                 );
 
+                //todo
+                logger.info(`RECEIVER: ${JSON.stringify(chunk)}`);
                 if (chunk.length === 1) {
                     const receiver: Receiver = {
                         wallet: chunk[0].wallet,
@@ -79,6 +81,8 @@ export class TransactionEngine {
                         this.nonce += 1;
                         nonce = this.nonce.toString();
                     }
+                    //todo
+                    logger.info(`NONCE: ${nonce}; BUSINESS: ${business}`);
                     let transaction: MultiPaymentBuilder = Transactions.BuilderFactory.multiPayment()
                         .fee(this.config.multiTransferFee.toFixed(0))
                         .nonce(nonce);
