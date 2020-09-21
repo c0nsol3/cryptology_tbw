@@ -486,7 +486,7 @@ export class TrueBlockWeightEngine {
                 this.networkVersion
             );
             if (businessTransactions.length === 0) {
-                return null;
+                return new Map();
             }
 
             return this.getBusinessRevenuePerForgeBlock(
@@ -496,7 +496,7 @@ export class TrueBlockWeightEngine {
             );
         }
 
-        return null;
+        return new Map();
     }
 
     /*
@@ -880,7 +880,7 @@ export class TrueBlockWeightEngine {
             const rewardThisBlock: BigNumber = item.reward;
             const totalFeesThisBlock: BigNumber = new BigNumber(item.fees);
             const totalBusinessIncomeThisBlock: BigNumber =
-                businessRevenue === null
+                businessRevenue.size === 0
                     ? new BigNumber(0)
                     : new BigNumber(businessRevenue.get(height));
             let validVoters: string[] = votersPerForgedBlock.get(height);
