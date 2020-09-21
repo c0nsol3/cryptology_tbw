@@ -172,10 +172,7 @@ export class TrueBlockWeight {
 
                 const businessAmount = payouts.businessPayouts.get(address);
 
-                if (
-                    businessAmount &&
-                    new BigNumber(businessAmount).gt(0)
-                ) {
+                if (businessAmount && new BigNumber(businessAmount).gt(0)) {
                     const amount: BigNumber = new BigNumber(businessAmount);
                     totalBusinessAmount = totalBusinessAmount.plus(amount);
                     const receiver: Receiver = {
@@ -251,18 +248,23 @@ export class TrueBlockWeight {
         totalAmount: BigNumber,
         timestamp: number
     ): Promise<Interfaces.ITransactionData[]> {
+
+        if(totalAmount.lte(0)) {
+            throw new Error("There is no amount to share with Admins.")
+        }
+
         let payoutAmount: BigNumber = new BigNumber(0);
         const adminReceivers: Receiver[] = [];
 
         for (const admin of this.config.admins) {
-            const amount: BigNumber = totalAmount.times(admin.percentage);
-            const vendorField: string = `${this.config.delegate} - ${admin.vendorField}`;
-            const receiver: Receiver = {
-                amount,
-                vendorField,
-                wallet: admin.wallet,
-            };
-            if (receiver.amount.gt(0)) {
+            if (admin.percentage && new BigNumber(admin.percentage).gt(0)) {
+                const amount: BigNumber = totalAmount.times(admin.percentage);
+                const vendorField: string = `${this.config.delegate} - ${admin.vendorField}`;
+                const receiver: Receiver = {
+                    amount,
+                    vendorField,
+                    wallet: admin.wallet,
+                };
                 adminReceivers.push(receiver);
                 payoutAmount = payoutAmount.plus(amount);
                 logger.info(
@@ -304,7 +306,7 @@ export class TrueBlockWeight {
         timestamp: number
     ): Promise<Interfaces.ITransactionData> {
         if (amount.isNaN() || amount.lte(0)) {
-            return null;
+            throw new Error("Bad license fee calculated.");
         }
         logger.info(
             `License fee payout prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
