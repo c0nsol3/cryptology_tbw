@@ -91,7 +91,7 @@ export class Config {
             );
         }
 
-        if(this.voterShare.eq(0)) {
+        if (this.voterShare.eq(0)) {
             this.adminFees = true;
         }
 

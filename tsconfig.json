@@ -8,8 +8,8 @@
         "moduleResolution": "node",
         "sourceMap": true,
         "strict": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "resolveJsonModule": true,
         "outDir": "dist",
         "esModuleInterop": true

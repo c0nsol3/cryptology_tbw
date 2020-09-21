@@ -80,15 +80,11 @@ export class DatabaseAPI {
      * @param delegatePublicKey
      * @param startBlockHeight
      * @param endBlockHeight
-     * @param payoutSignature
-     * @param noSignature In case a Blockchain doesn't use a VendorField (e.g. like NOS)
      */
     public async getDelegatePayoutTransactions(
         delegatePublicKey: string,
         startBlockHeight: number,
         endBlockHeight: number,
-        payoutSignature: string,
-        noSignature: boolean
     ): Promise<DelegateTransaction[]> {
         const getDelegateTransactionsQuery = getDelegateTransactions(
             startBlockHeight,

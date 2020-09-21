@@ -43,7 +43,6 @@ export class TrueBlockWeightEngine {
     private readonly network: Network;
     private readonly databaseAPI: DatabaseAPI;
     private readonly proposalEngine: ProposalEngine;
-    private readonly payoutSignature: string;
     private startBlockHeight: number;
     private readonly endBlockHeight: number;
     private networkConfig: Interfaces.INetworkConfig;
@@ -56,7 +55,6 @@ export class TrueBlockWeightEngine {
         });
 
         this.config = new Config();
-        this.payoutSignature = `${this.config.delegate} - `;
         this.startBlockHeight = this.config.startFromBlockHeight;
         this.endBlockHeight = this.config.endAtBlockHeight;
         this.network = new Network(this.config.server, this.config.nodes);
@@ -121,8 +119,6 @@ export class TrueBlockWeightEngine {
                 delegatePublicKey,
                 this.startBlockHeight,
                 this.endBlockHeight,
-                this.payoutSignature,
-                this.config.noSignature
             );
 
             logger.info("Retrieving Voters.");
@@ -271,26 +267,24 @@ export class TrueBlockWeightEngine {
                 ? voterMutations[voterMutations.length - 1].height + 1
                 : forgedBlocks[forgedBlocks.length - 1].height + 1;
 
-        calculatedVotersPerForgedBlock.forEach(
-            (votersDuringBlock: string[], height: number) => {
+        forgedBlocks.forEach(
+            (block: ForgedBlock) => {
                 const filteredVotersForRound: VoterMutation[] = this.filterVoteTransactionsForRound(
                     voterMutations,
-                    height,
+                    block.height,
                     previousHeight
                 );
 
                 const mutatedVoters: MutatedVotersPerRound = this.mutateVoters(
-                    height,
-                    previousHeight,
                     votersRound,
                     voters,
                     filteredVotersForRound
                 );
                 voters = mutatedVoters.voters.splice(0);
                 votersRound = mutatedVoters.votersPerRound.slice(0);
-                previousHeight = height;
+                previousHeight = block.height;
                 calculatedVotersPerForgedBlock.set(
-                    height,
+                    block.height,
                     votersRound.slice(0)
                 );
             }
@@ -325,15 +319,11 @@ export class TrueBlockWeightEngine {
 
     /**
      *
-     * @param height
-     * @param previousHeight
      * @param votersPerRound
      * @param voters
      * @param voteTransactions
      */
     public mutateVoters(
-        height: number,
-        previousHeight: number,
         votersPerRound: string[],
         voters: string[],
         voteTransactions: VoterMutation[]
@@ -494,56 +484,67 @@ export class TrueBlockWeightEngine {
                 return null;
             }
 
-            let previousHeight: number = null;
-            const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
-                forgedBlocks.map((block) => [block.height, new BigNumber(0)])
+            return this.getBusinessRevenuePerForgeBlock(
+                forgedBlocks,
+                businessTransactions,
+                businessWallet
             );
-            revenuePerForgedBlock.forEach(
-                (revenue: BigNumber, height: number) => {
-                    if (previousHeight === null) {
-                        previousHeight = height + 1;
-                    }
-
-                    const calculatedTransactions: Transaction[] = businessTransactions.filter(
-                        (transaction) => {
-                            return (
-                                transaction.height >= height &&
-                                transaction.height < previousHeight
-                            );
-                        }
-                    );
-
-                    let amount: BigNumber = new BigNumber(0);
-                    for (const item of calculatedTransactions) {
-                        const recipientId: string = item.recipientId;
-
-                        if (item.multiPayment !== null) {
-                            for (const transaction of item.multiPayment) {
-                                const transactionAmount: BigNumber = new BigNumber(
-                                    transaction.amount.toString()
-                                );
-
-                                if (
-                                    transaction.recipientId === businessWallet
-                                ) {
-                                    amount = amount.plus(transactionAmount);
-                                }
-                            }
-                        } else {
-                            if (recipientId === businessWallet) {
-                                amount = amount.plus(item.amount);
-                            }
-                        }
-                    }
-                    revenuePerForgedBlock.set(height, amount);
-                    previousHeight = height;
-                }
-            );
-
-            return revenuePerForgedBlock;
         }
 
         return null;
+    }
+
+    /*
+
+     */
+    private getBusinessRevenuePerForgeBlock(
+        forgedBlocks: ForgedBlock[],
+        businessTransactions: Transaction[],
+        businessWallet: string
+    ): Map<number, BigNumber> {
+        let previousHeight: number = null;
+        const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
+            forgedBlocks.map((block) => [block.height, new BigNumber(0)])
+        );
+        forgedBlocks.forEach((block: ForgedBlock) => {
+            if (previousHeight === null) {
+                previousHeight = block.height + 1;
+            }
+
+            const calculatedTransactions: Transaction[] = businessTransactions.filter(
+                (transaction) => {
+                    return (
+                        transaction.height >= block.height &&
+                        transaction.height < previousHeight
+                    );
+                }
+            );
+
+            let amount: BigNumber = new BigNumber(0);
+            for (const item of calculatedTransactions) {
+                const recipientId: string = item.recipientId;
+
+                if (item.multiPayment !== null) {
+                    for (const transaction of item.multiPayment) {
+                        const transactionAmount: BigNumber = new BigNumber(
+                            transaction.amount.toString()
+                        );
+
+                        if (transaction.recipientId === businessWallet) {
+                            amount = amount.plus(transactionAmount);
+                        }
+                    }
+                } else {
+                    if (recipientId === businessWallet) {
+                        amount = amount.plus(item.amount);
+                    }
+                }
+            }
+            revenuePerForgedBlock.set(block.height, amount);
+            previousHeight = block.height;
+        });
+
+        return revenuePerForgedBlock;
     }
 
     /**
@@ -581,13 +582,13 @@ export class TrueBlockWeightEngine {
             Map<string, BigNumber>
         > = new Map(forgedBlocks.map((block) => [block.height, null]));
 
-        votersBalancePerForgedBlock.forEach(
-            (votersDuringBlock: Map<string, BigNumber>, height: number) => {
+        forgedBlocks.forEach(
+            (block: ForgedBlock) => {
                 if (previousHeight === null) {
-                    previousHeight = height + 1;
+                    previousHeight = block.height + 1;
                 }
 
-                const timestamp = timestampPerForgedBlock.get(height);
+                const timestamp = timestampPerForgedBlock.get(block.height);
                 maxTimestamp = minTimestamp;
                 minTimestamp = timestamp.minus(1);
 
@@ -596,7 +597,7 @@ export class TrueBlockWeightEngine {
                 }
 
                 calculatedVoters = this.mutateVotersBalances(
-                    height,
+                    block.height,
                     previousHeight,
                     maxTimestamp,
                     minTimestamp,
@@ -605,9 +606,9 @@ export class TrueBlockWeightEngine {
                     voterBalances,
                     votingDelegateBlocks
                 );
-                previousHeight = height;
+                previousHeight = block.height;
                 votersBalancePerForgedBlock.set(
-                    height,
+                    block.height,
                     new Map(calculatedVoters)
                 );
                 calculatedVoters.forEach(
