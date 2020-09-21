@@ -47,67 +47,72 @@ export class TransactionEngine {
         await this.setupNetwork();
         const transactions: Interfaces.ITransactionData[] = [];
 
-        for (
-            let i = 0;
-            i < receivers.length;
-            i += this.config.transactionsPerMultitransfer
-        ) {
-            const chunk: Receiver[] = receivers.slice(
-                i,
-                i + this.config.transactionsPerMultitransfer
-            );
-
-            if (chunk.length === 1) {
-                const receiver: Receiver = {
-                    wallet: chunk[0].wallet,
-                    amount: chunk[0].amount,
-                    vendorField,
-                };
-                const transaction: Interfaces.ITransactionData = await this.createTransaction(
-                    receiver,
-                    timestamp,
-                    business
+        try {
+            for (
+                let i = 0;
+                i < receivers.length;
+                i += this.config.transactionsPerMultitransfer
+            ) {
+                const chunk: Receiver[] = receivers.slice(
+                    i,
+                    i + this.config.transactionsPerMultitransfer
                 );
-                transactions.push(transaction);
-            } else {
-                let nonce: string;
-                if (business) {
-                    this.businessNonce += 1;
-                    nonce = this.businessNonce.toString();
+
+                if (chunk.length === 1) {
+                    const receiver: Receiver = {
+                        wallet: chunk[0].wallet,
+                        amount: chunk[0].amount,
+                        vendorField,
+                    };
+                    const transaction: Interfaces.ITransactionData = await this.createTransaction(
+                        receiver,
+                        timestamp,
+                        business
+                    );
+                    transactions.push(transaction);
                 } else {
-                    this.nonce += 1;
-                    nonce = this.nonce.toString();
-                }
-                let transaction: MultiPaymentBuilder = Transactions.BuilderFactory.multiPayment()
-                    .fee(this.config.multiTransferFee.toFixed(0))
-                    .nonce(nonce);
-
-                if (!this.config.noSignature) {
-                    transaction = transaction.vendorField(vendorField);
-                }
-
-                for (const receiver of chunk) {
-                    const amount = receiver.amount;
-                    if (amount) {
-                        transaction.addPayment(
-                            receiver.wallet,
-                            amount.toFixed(0)
-                        );
+                    let nonce: string;
+                    if (business) {
+                        this.businessNonce += 1;
+                        nonce = this.businessNonce.toString();
+                    } else {
+                        this.nonce += 1;
+                        nonce = this.nonce.toString();
                     }
-                }
-                if (timestamp) {
-                    transaction.data.timestamp = timestamp;
-                }
+                    let transaction: MultiPaymentBuilder = Transactions.BuilderFactory.multiPayment()
+                        .fee(this.config.multiTransferFee.toFixed(0))
+                        .nonce(nonce);
 
-                transaction = transaction.sign(seed);
+                    if (!this.config.noSignature) {
+                        transaction = transaction.vendorField(vendorField);
+                    }
 
-                if (secondPassphrase !== "") {
-                    transaction = transaction.secondSign(secondPassphrase);
+                    for (const receiver of chunk) {
+                        const amount = receiver.amount;
+                        if (amount) {
+                            transaction.addPayment(
+                                receiver.wallet,
+                                amount.toFixed(0)
+                            );
+                        }
+                    }
+                    if (timestamp) {
+                        transaction.data.timestamp = timestamp;
+                    }
+
+                    transaction = transaction.sign(seed);
+
+                    if (secondPassphrase !== "") {
+                        transaction = transaction.secondSign(secondPassphrase);
+                    }
+                    transactions.push(transaction.getStruct());
                 }
-                transactions.push(transaction.getStruct());
             }
+            return transactions;
+        } catch (e) {
+            logger.error(e);
+            throw e;
         }
-        return transactions;
     }
 
     /**
