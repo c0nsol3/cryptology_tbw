@@ -98,7 +98,7 @@ export class TransactionEngine {
 
                 transaction = transaction.sign(seed);
 
-                if (secondPassphrase !== null) {
+                if (secondPassphrase !== "") {
                     transaction = transaction.secondSign(secondPassphrase);
                 }
                 transactions.push(transaction.getStruct());
@@ -151,7 +151,7 @@ export class TransactionEngine {
 
         transaction = transaction.sign(this.config.seed);
 
-        if (this.config.secondPassphrase !== null) {
+        if (this.config.secondPassphrase !== "") {
             transaction = transaction.secondSign(this.config.secondPassphrase);
         }
 
@@ -187,7 +187,7 @@ export class TransactionEngine {
             );
         }
 
-        if (this.businessNonce === null && this.config.businessSeed !== null) {
+        if (this.businessNonce === null && this.config.businessSeed !== "") {
             const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.businessSeed
             );

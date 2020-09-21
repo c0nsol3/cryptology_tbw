@@ -465,7 +465,7 @@ export class TrueBlockWeightEngine {
     public async getBusinessIncome(
         forgedBlocks: ForgedBlock[]
     ): Promise<Map<number, BigNumber>> {
-        if (this.config.businessSeed) {
+        if (this.config.businessSeed !== "") {
             const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.businessSeed
             );
