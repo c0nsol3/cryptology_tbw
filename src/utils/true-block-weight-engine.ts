@@ -447,11 +447,10 @@ export class TrueBlockWeightEngine {
                     );
                     let height: BigNumber = new BigNumber(0);
                     if (latestPayoutForVoter) {
-                        height = new BigNumber(
-                            latestPayoutForVoter
-                        );
+                        height = new BigNumber(latestPayoutForVoter);
                     }
                     if (
+                        !latestPayoutForVoter ||
                         height.isNaN() ||
                         height.lt(new BigNumber(transaction.height))
                     ) {
