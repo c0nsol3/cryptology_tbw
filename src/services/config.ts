@@ -34,7 +34,7 @@ export class Config {
         percentage: new BigNumber(0),
     };
     public readonly customShares: number[];
-    public readonly walletRedirections: string[];
+    public readonly walletRedirections: { [key: string]: string };
     public readonly customPayoutFrequencies: number[];
     public readonly databaseHost: string;
     public readonly databaseUser: string;

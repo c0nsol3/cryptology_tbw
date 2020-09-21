@@ -170,25 +170,25 @@ export class TrueBlockWeight {
                 totalAmount = totalAmount.plus(amount);
                 receivers.push(receiver);
 
-                const businessAmount: BigNumber = payouts.businessPayouts.get(
-                    address
-                );
-                if (businessAmount.gt(0)) {
-                    totalBusinessAmount = totalBusinessAmount.plus(
-                        businessAmount
-                    );
+                const businessAmount = payouts.businessPayouts.get(address);
+
+                if (
+                    businessAmount &&
+                    new BigNumber(businessAmount).gt(0)
+                ) {
+                    const amount: BigNumber = new BigNumber(businessAmount);
+                    totalBusinessAmount = totalBusinessAmount.plus(amount);
                     const receiver: Receiver = {
-                        amount: businessAmount,
+                        amount,
                         wallet,
                     };
-                    if (businessAmount.gt(0)) {
-                        businessReceivers.push(receiver);
-                        logger.info(
-                            `Business Share to ${wallet} prepared: ${businessAmount
-                                .div(ARKTOSHI)
-                                .toFixed(8)}`
-                        );
-                    }
+
+                    businessReceivers.push(receiver);
+                    logger.info(
+                        `Business Share to ${wallet} prepared: ${amount
+                            .div(ARKTOSHI)
+                            .toFixed(8)}`
+                    );
                 }
             }
         }
