@@ -421,21 +421,24 @@ export class TrueBlockWeightEngine {
 
         for (const transaction of delegatePayoutTransactions) {
             if (transaction.recipientId !== null) {
-                const height: BigNumber = new BigNumber(
-                    latestPayouts.get(transaction.recipientId)
-                );
-                if (
-                    height.isNaN() ||
-                    height.lt(new BigNumber(transaction.height))
-                ) {
-                    latestPayouts.set(
-                        transaction.recipientId,
-                        transaction.height
+                let latestPayoutForVoter = latestPayouts.get(transaction.recipientId);
+                if(latestPayoutForVoter) {
+                    const height: BigNumber = new BigNumber(
+                        latestPayoutForVoter
                     );
-                    latestPayoutsTimeStamp.set(
-                        transaction.recipientId,
-                        transaction.timestamp
-                    );
+                    if (
+                        height.isNaN() ||
+                        height.lt(new BigNumber(transaction.height))
+                    ) {
+                        latestPayouts.set(
+                            transaction.recipientId,
+                            transaction.height
+                        );
+                        latestPayoutsTimeStamp.set(
+                            transaction.recipientId,
+                            transaction.timestamp
+                        );
+                    }
                 }
             } else if (transaction.multiPayment !== null) {
                 for (const receiver of transaction.multiPayment) {
