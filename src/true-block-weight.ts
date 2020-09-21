@@ -86,8 +86,7 @@ export class TrueBlockWeight {
             logger.info(SEPARATOR);
             return transfers;
         } catch (error) {
-            logger.error(error.message);
-            return null;
+            throw error;
         }
     }
 
@@ -155,15 +154,14 @@ export class TrueBlockWeight {
 
         const receivers: Receiver[] = [];
         const businessReceivers: Receiver[] = [];
-        for (const [address] of payouts.payouts) {
+        for (const [address, amount] of payouts.payouts) {
             const wallet: string = this.getRedirectAddress(address);
             logger.info(
-                `Delegate Share to ${wallet} prepared: ${payouts.payouts
-                    .get(address)
+                `Delegate Share to ${wallet} prepared: ${amount
                     .div(ARKTOSHI)
                     .toFixed(8)}`
             );
-            const amount: BigNumber = payouts.payouts.get(address);
+
             const receiver: Receiver = {
                 amount,
                 wallet,

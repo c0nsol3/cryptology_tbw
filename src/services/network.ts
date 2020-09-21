@@ -76,7 +76,7 @@ export class Network {
                 walletInfo.hasOwnProperty("data") &&
                 walletInfo.data.hasOwnProperty("nonce")
                     ? parseInt(walletInfo.data.nonce, 10)
-                    : null;
+                    : Number.NaN;
             logger.info(`Nonce loaded for ${wallet}: ${nonce}`);
             return nonce;
         } catch (e) {

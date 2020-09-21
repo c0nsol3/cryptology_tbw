@@ -1,3 +1,4 @@
+// @ts-ignore
 import { Client, Result } from "pg";
 import { DatabaseConfig } from "../interfaces";
 import { logger } from "./";

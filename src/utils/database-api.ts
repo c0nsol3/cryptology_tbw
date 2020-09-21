@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+// @ts-ignore
 import { Result } from "pg";
 import {
     Block,
