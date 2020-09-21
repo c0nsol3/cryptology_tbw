@@ -58,8 +58,6 @@ export class TransactionEngine {
                     i + this.config.transactionsPerMultitransfer
                 );
 
-                //todo
-                logger.info(`RECEIVER: ${JSON.stringify(chunk)}`);
                 if (chunk.length === 1) {
                     const receiver: Receiver = {
                         wallet: chunk[0].wallet,
@@ -81,8 +79,7 @@ export class TransactionEngine {
                         this.nonce += 1;
                         nonce = this.nonce.toString();
                     }
-                    //todo
-                    logger.info(`NONCE: ${nonce}; BUSINESS: ${business}`);
+
                     let transaction: MultiPaymentBuilder = Transactions.BuilderFactory.multiPayment()
                         .fee(this.config.multiTransferFee.toFixed(0))
                         .nonce(nonce);
@@ -141,7 +138,7 @@ export class TransactionEngine {
             nonce = this.nonce.toString();
         }
         let amount = receiver.amount;
-        if(amount === undefined) {
+        if (amount === undefined) {
             amount = new BigNumber(0);
         }
         let transaction: TransferBuilder = Transactions.BuilderFactory.transfer()
@@ -152,7 +149,7 @@ export class TransactionEngine {
 
         if (!this.config.noSignature) {
             let vendorField = receiver.vendorField;
-            if(vendorField === undefined) {
+            if (vendorField === undefined) {
                 vendorField = "";
             }
             transaction = transaction.vendorField(vendorField);
@@ -206,7 +203,10 @@ export class TransactionEngine {
             );
         }
 
-        if (Number.isNaN(this.businessNonce) && this.config.businessSeed !== "") {
+        if (
+            Number.isNaN(this.businessNonce) &&
+            this.config.businessSeed !== ""
+        ) {
             const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.businessSeed
             );
