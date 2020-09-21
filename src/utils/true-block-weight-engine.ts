@@ -510,12 +510,12 @@ export class TrueBlockWeightEngine {
         businessTransactions: Transaction[],
         businessWallet: string
     ): Map<number, BigNumber> {
-        let previousHeight: number = null;
+        let previousHeight: number = Number.NaN;
         const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
             forgedBlocks.map((block) => [block.height, new BigNumber(0)])
         );
         forgedBlocks.forEach((block: ForgedBlock) => {
-            if (previousHeight === null) {
+            if (Number.isNaN(previousHeight)) {
                 previousHeight = block.height + 1;
             }
 
