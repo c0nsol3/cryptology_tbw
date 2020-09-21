@@ -7,7 +7,7 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "sourceMap": true,
-        "strict": true,
+        "strict": false,
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "resolveJsonModule": true,
