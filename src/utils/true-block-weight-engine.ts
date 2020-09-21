@@ -698,9 +698,12 @@ export class TrueBlockWeightEngine {
                     }
                 }
             } else {
-                if (votersBalancePerForgedBlock.has(recipientId)) {
-                    let balance: BigNumber = votersBalancePerForgedBlock.get(
-                        recipientId
+                let balanceForVoterInBlock = votersBalancePerForgedBlock.get(
+                    recipientId
+                );
+                if (balanceForVoterInBlock) {
+                    let balance: BigNumber = new BigNumber(
+                        balanceForVoterInBlock
                     );
 
                     balance = balance.minus(amount);
@@ -712,17 +715,21 @@ export class TrueBlockWeightEngine {
                 }
             }
 
-            if (votersBalancePerForgedBlock.has(senderId)) {
-                let balance: BigNumber = votersBalancePerForgedBlock.get(
-                    senderId
-                );
+            let balanceForVoterInBlock = votersBalancePerForgedBlock.get(
+                senderId
+            );
+            if (balanceForVoterInBlock) {
+                let balance: BigNumber = new BigNumber(balanceForVoterInBlock);
 
                 if (stakeRedeemID !== null) {
                     let processedStakes: Stake[] = [];
                     for (const item in voters) {
                         if (voters[item] && voters[item].address === senderId) {
-                            processedStakes = voters[item].processedStakes;
-                            break;
+                            let processedStakesForVoter = voters[item].processedStakes;
+                            if(processedStakesForVoter) {
+                                processedStakes = processedStakesForVoter
+                                break;
+                            }
                         }
                     }
                     const redeemValue: BigNumber = TrueBlockWeightEngine.getStakeRedeemValue(
