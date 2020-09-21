@@ -200,6 +200,8 @@ export class TransactionEngine {
             milestone.multiPaymentLimit
         );
 
+        //todo
+        logger.warn(`NONCE: ${this.nonce}`);
         if (this.nonce === Number.NaN) {
             this.nonce = await this.network.getNonceForDelegate(
                 this.config.delegate
