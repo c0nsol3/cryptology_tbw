@@ -595,13 +595,15 @@ export class TrueBlockWeightEngine {
             }
 
             const timestamp = timestampPerForgedBlock.get(block.height);
-            if(timestamp) {
+            if (timestamp) {
                 maxTimestamp = minTimestamp;
                 minTimestamp = timestamp.minus(1);
 
                 if (maxTimestamp.eq(0)) {
                     maxTimestamp = timestamp;
                 }
+            } else {
+                throw new Error(`Block at ${block.height} has no timestamp.`);
             }
 
             calculatedVoters = this.mutateVotersBalances(
@@ -653,7 +655,7 @@ export class TrueBlockWeightEngine {
         votersBalancePerForgedBlock: Map<string, BigNumber>,
         transactions: Transaction[],
         voters: Voter[],
-        votingDelegateBlocks
+        votingDelegateBlocks: VoterBlock[]
     ): Map<string, BigNumber> {
         // Only process mutations that are in range
         const calculatedTransactions: Transaction[] = transactions.filter(
@@ -678,11 +680,12 @@ export class TrueBlockWeightEngine {
                         transaction.amount.toString()
                     );
                     amount = amount.plus(transactionAmount);
-                    if (
-                        votersBalancePerForgedBlock.has(transaction.recipientId)
-                    ) {
-                        let balance: BigNumber = votersBalancePerForgedBlock.get(
-                            transaction.recipientId
+                    const balanceForgedBlockForVoter = votersBalancePerForgedBlock.get(
+                        transaction.recipientId
+                    );
+                    if (balanceForgedBlockForVoter) {
+                        let balance: BigNumber = new BigNumber(
+                            balanceForgedBlockForVoter
                         );
                         balance = balance.minus(transactionAmount);
                         if (balance.lt(0)) {
