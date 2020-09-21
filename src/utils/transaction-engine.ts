@@ -9,8 +9,8 @@ import { Crypto } from "./crypto";
 export class TransactionEngine {
     private readonly config: Config;
     private readonly network: Network;
-    private nonce: number = null;
-    private businessNonce: number = null;
+    private nonce: number = Number.NaN;
+    private businessNonce: number = Number.NaN;
 
     constructor() {
         BigNumber.config({
@@ -87,10 +87,13 @@ export class TransactionEngine {
                 }
 
                 for (const receiver of chunk) {
-                    transaction.addPayment(
-                        receiver.wallet,
-                        receiver.amount.toFixed(0)
-                    );
+                    const amount = receiver.amount;
+                    if (amount) {
+                        transaction.addPayment(
+                            receiver.wallet,
+                            amount.toFixed(0)
+                        );
+                    }
                 }
                 if (timestamp) {
                     transaction.data.timestamp = timestamp;
@@ -128,18 +131,25 @@ export class TransactionEngine {
             this.nonce += 1;
             nonce = this.nonce.toString();
         }
-
+        let amount = receiver.amount;
+        if(amount === undefined) {
+            amount = new BigNumber(0);
+        }
         let transaction: TransferBuilder = Transactions.BuilderFactory.transfer()
-            .amount(receiver.amount.toFixed(0))
+            .amount(amount.toFixed(0))
             .recipientId(receiver.wallet)
             .fee(this.config.transferFee.toFixed(0))
             .nonce(nonce);
 
         if (!this.config.noSignature) {
-            transaction = transaction.vendorField(receiver.vendorField);
+            let vendorField = receiver.vendorField;
+            if(vendorField === undefined) {
+                vendorField = "";
+            }
+            transaction = transaction.vendorField(vendorField);
             if (
-                Buffer.from(receiver.vendorField).length > 64 &&
-                Buffer.from(receiver.vendorField).length <= 255
+                Buffer.from(vendorField).length > 64 &&
+                Buffer.from(vendorField).length <= 255
             ) {
                 transaction.data.vendorField = this.config.vendorField;
             }
@@ -181,13 +191,13 @@ export class TransactionEngine {
             milestone.multiPaymentLimit
         );
 
-        if (this.nonce === null) {
+        if (this.nonce === Number.NaN) {
             this.nonce = await this.network.getNonceForDelegate(
                 this.config.delegate
             );
         }
 
-        if (this.businessNonce === null && this.config.businessSeed !== "") {
+        if (this.businessNonce === Number.NaN && this.config.businessSeed !== "") {
             const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.businessSeed
             );
