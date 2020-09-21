@@ -442,21 +442,24 @@ export class TrueBlockWeightEngine {
                 }
             } else if (transaction.multiPayment !== null) {
                 for (const receiver of transaction.multiPayment) {
-                    const height: BigNumber = new BigNumber(
-                        latestPayouts.get(receiver.recipientId)
-                    );
-                    if (
-                        height.isNaN() ||
-                        height.lt(new BigNumber(transaction.height))
-                    ) {
-                        latestPayouts.set(
-                            receiver.recipientId,
-                            transaction.height
+                    let latestPayoutForVoter = latestPayouts.get(receiver.recipientId);
+                    if(latestPayoutForVoter) {
+                        const height: BigNumber = new BigNumber(
+                            latestPayoutForVoter
                         );
-                        latestPayoutsTimeStamp.set(
-                            receiver.recipientId,
-                            transaction.timestamp
-                        );
+                        if (
+                            height.isNaN() ||
+                            height.lt(new BigNumber(transaction.height))
+                        ) {
+                            latestPayouts.set(
+                                receiver.recipientId,
+                                transaction.height
+                            );
+                            latestPayoutsTimeStamp.set(
+                                receiver.recipientId,
+                                transaction.timestamp
+                            );
+                        }
                     }
                 }
             }
