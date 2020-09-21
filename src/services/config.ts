@@ -33,9 +33,9 @@ export class Config {
         walletLimit: new BigNumber(0),
         percentage: new BigNumber(0),
     };
-    public readonly customShares: number[];
+    public readonly customShares: { [key: string]: number };
     public readonly walletRedirections: { [key: string]: string };
-    public readonly customPayoutFrequencies: number[];
+    public readonly customPayoutFrequencies: { [key: string]: number };
     public readonly databaseHost: string;
     public readonly databaseUser: string;
     public readonly databasePassword: string;

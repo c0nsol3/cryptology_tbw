@@ -569,7 +569,7 @@ export class TrueBlockWeightEngine {
                 new BigNumber(voterBalances.balance),
             ])
         );
-        let previousHeight: number = null;
+        let previousHeight: number = Number.NaN;
         let minTimestamp: BigNumber = new BigNumber(0);
         let maxTimestamp: BigNumber = new BigNumber(0);
 
@@ -584,7 +584,7 @@ export class TrueBlockWeightEngine {
 
         forgedBlocks.forEach(
             (block: ForgedBlock) => {
-                if (previousHeight === null) {
+                if (previousHeight === Number.NaN) {
                     previousHeight = block.height + 1;
                 }
 

@@ -72,26 +72,31 @@ export class ProposalEngine {
                     delegatePayout = new BigNumber(0);
                 }
 
-                let businessBalance = new BigNumber(
-                    businessPayouts.get(address)
-                );
-                if (businessBalance.isNaN() || businessBalance.lt(0)) {
-                    businessBalance = new BigNumber(0);
+                const businessPayoutForAddress = businessPayouts.get(address);
+                if (
+                    businessPayoutForAddress &&
+                    new BigNumber(businessPayoutForAddress).gt(0)
+                ) {
+                    let businessBalance = new BigNumber(
+                        businessPayoutForAddress
+                    );
+                    const businessPayout: BigNumber = new BigNumber(
+                        businessBalance
+                            .times(this.config.voterBusinessShare)
+                            .integerValue(BigNumber.ROUND_DOWN)
+                    );
+                    totalBusinessPayout = totalBusinessPayout.plus(
+                        businessPayout
+                    );
+                    businessPayouts.set(address, businessPayout);
                 }
-                const businessPayout: BigNumber = new BigNumber(
-                    businessBalance
-                        .times(this.config.voterBusinessShare)
-                        .integerValue(BigNumber.ROUND_DOWN)
-                );
                 delegateProfit = delegateProfit.plus(delegatePayout);
                 acfDonation = acfDonation.plus(acfPayout);
-                totalBusinessPayout = totalBusinessPayout.plus(businessPayout);
 
                 let voterFeePayout: BigNumber = new BigNumber(0);
-                const feePayout: BigNumber = new BigNumber(
-                    feesPayouts.get(address)
-                );
-                if (!feePayout.isNaN() && feePayout.gt(0)) {
+                const voterFeesPayout = feesPayouts.get(address);
+                if (voterFeesPayout && new BigNumber(voterFeePayout).gt(0)) {
+                    const feePayout: BigNumber = new BigNumber(voterFeesPayout);
                     const acfFeesPayout: BigNumber = new BigNumber(
                         feePayout.times(this.config.donationShare)
                     );
@@ -110,26 +115,30 @@ export class ProposalEngine {
                     );
                 }
                 payouts.set(address, voterPayout.plus(voterFeePayout));
-                businessPayouts.set(address, businessPayout);
 
+                const payoutForVoter = payouts.get(address);
                 if (
-                    payouts.get(address).lt(this.config.minimalPayoutValue) ||
-                    payouts.get(address).eq(0)
+                    payoutForVoter &&
+                    (new BigNumber(payoutForVoter).lt(
+                        this.config.minimalPayoutValue
+                    ) ||
+                        new BigNumber(payoutForVoter).eq(0))
                 ) {
-                    if (payouts.get(address).gt(0)) {
+                    if (new BigNumber(payoutForVoter).gt(0)) {
                         logger.warn(
                             `Payout to ${address} pending (min. value ${this.config.minimalPayoutValue
                                 .div(ARKTOSHI)
-                                .toNumber()}): ${payouts
-                                .get(address)
+                                .toNumber()}): ${new BigNumber(payoutForVoter)
                                 .div(ARKTOSHI)
                                 .toFixed(8)}`
                         );
                     }
                     payouts.delete(address);
                     businessPayouts.delete(address);
-                } else {
-                    totalPayout = totalPayout.plus(payouts.get(address));
+                } else if (payoutForVoter) {
+                    totalPayout = totalPayout.plus(
+                        new BigNumber(payoutForVoter)
+                    );
                 }
             } else {
                 payouts.delete(address);
@@ -179,13 +188,17 @@ export class ProposalEngine {
                     totalPayout = totalPayout.minus(fairFees);
                 }
             }
-            let businessPayout: BigNumber = businessPayouts
-                .get(address)
-                .minus(fairFees);
-            if (businessPayout.lt(0)) {
-                businessPayout = new BigNumber(0);
+
+            const businessPayoutForVoter = businessPayouts.get(address);
+            if (businessPayoutForVoter) {
+                let businessPayout: BigNumber = new BigNumber(
+                    businessPayoutForVoter
+                ).minus(fairFees);
+                if (businessPayout.lt(0)) {
+                    businessPayout = new BigNumber(0);
+                }
+                businessPayouts.set(address, businessPayout);
             }
-            businessPayouts.set(address, businessPayout);
         }
 
         logger.info(SEPARATOR);
@@ -234,7 +247,7 @@ export class ProposalEngine {
         latestPayouts: Map<string, number>
     ): boolean {
         const frequency: number = this.getFrequencyAddress(address);
-        const lastPayoutHeight: number = latestPayouts.get(address);
+        const lastPayoutHeight = latestPayouts.get(address);
 
         if (!lastPayoutHeight || !frequency) {
             return true;
@@ -256,11 +269,7 @@ export class ProposalEngine {
      * @param address
      */
     public getFrequencyAddress(address: string): number {
-        if (
-            this.config.customPayoutFrequencies.hasOwnProperty(address) ===
-                true &&
-            typeof this.config.customPayoutFrequencies[address] === "number"
-        ) {
+        if (this.config.customPayoutFrequencies.hasOwnProperty(address)) {
             return this.config.customPayoutFrequencies[address];
         }
         return 0;
@@ -271,8 +280,8 @@ export class ProposalEngine {
      * @param address
      * @param smallWallets
      */
-    public getSharePercentage(address: string, smallWallets): BigNumber {
-        if (this.config.customShares.hasOwnProperty(address) === true) {
+    public getSharePercentage(address: string, smallWallets: Map<string, boolean>): BigNumber {
+        if (this.config.customShares.hasOwnProperty(address)) {
             let customShare: BigNumber = new BigNumber(
                 this.config.customShares[address]
             );

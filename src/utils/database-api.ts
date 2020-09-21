@@ -85,7 +85,7 @@ export class DatabaseAPI {
     public async getDelegatePayoutTransactions(
         delegatePublicKey: string,
         startBlockHeight: number,
-        endBlockHeight: number,
+        endBlockHeight: number
     ): Promise<DelegateTransaction[]> {
         const getDelegateTransactionsQuery = getDelegateTransactions(
             startBlockHeight,
@@ -218,18 +218,18 @@ export class DatabaseAPI {
 
         const votingDelegateBlocks: VoterBlock[] = [];
         for (const item of result.rows) {
-            if (
-                item.hasOwnProperty("generator_public_key") &&
-                wallets.has(item.generator_public_key)
-            ) {
-                const address: string = wallets.get(item.generator_public_key);
-                const block: VoterBlock = {
-                    address,
-                    height: parseInt(item.height, 10),
-                    fees: new BigNumber(item.total_fee),
-                    reward: new BigNumber(item.reward),
-                };
-                votingDelegateBlocks.push(block);
+            const generatorPublicKey = item.generator_public_key;
+            if (generatorPublicKey) {
+                const address = wallets.get(generatorPublicKey);
+                if (address) {
+                    const block: VoterBlock = {
+                        address,
+                        height: parseInt(item.height, 10),
+                        fees: new BigNumber(item.total_fee),
+                        reward: new BigNumber(item.reward),
+                    };
+                    votingDelegateBlocks.push(block);
+                }
             }
         }
 
@@ -280,7 +280,7 @@ export class DatabaseAPI {
                           item.senderPublicKey,
                           networkVersion
                       )
-                    : null,
+                    : "",
                 amount: new BigNumber(item.amount),
                 recipientId: item.type === 0 ? item.recipientId : null,
                 multiPayment:
