@@ -898,11 +898,15 @@ export class TrueBlockWeightEngine {
             const timestamp: BigNumber = item.timestamp;
             const rewardThisBlock: BigNumber = item.reward;
             const totalFeesThisBlock: BigNumber = new BigNumber(item.fees);
-            const totalBusinessIncomeThisBlock: BigNumber =
-                businessRevenue.size === 0
-                    ? new BigNumber(0)
-                    : new BigNumber(businessRevenue.get(height));
-            let validVoters: string[] = votersPerForgedBlock.get(height);
+            let totalBusinessIncomeThisBlock = businessRevenue.get(height);
+            if(!totalBusinessIncomeThisBlock) {
+                totalBusinessIncomeThisBlock = new BigNumber(0);
+            }
+
+            let validVoters = votersPerForgedBlock.get(height);
+            if(!validVoters) {
+                validVoters = [];
+            }
             const walletBalances: Map<
                 string,
                 BigNumber
@@ -921,7 +925,7 @@ export class TrueBlockWeightEngine {
 
             for (const address of validVoters) {
                 const payoutAddress: string = this.getRedirectAddress(address);
-                const latestPayout: BigNumber = latestPayoutsTimeStamp.get(
+                const latestPayout = latestPayoutsTimeStamp.get(
                     payoutAddress
                 );
 
