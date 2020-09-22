@@ -1042,7 +1042,7 @@ export class TrueBlockWeightEngine {
      * @param address
      */
     private getRedirectAddress(address: string): string {
-        if (this.config.walletRedirections.hasOwnProperty(address) === true) {
+        if (this.config.walletRedirections.hasOwnProperty(address)) {
             address = this.config.walletRedirections[address];
         }
 
