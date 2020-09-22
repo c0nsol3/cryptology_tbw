@@ -377,8 +377,6 @@ export class ProposalEngine {
             const isCurrentVoter: boolean = currentVoters.indexOf(address) >= 0;
             const balance = currentBalances.get(address);
             if(!isCurrentVoter || !balance || balance.lte(0) || pendingBalance.lte(0)) {
-                //todo
-                logger.warn(`Pool Hopper removed: ${address}`)
                 payouts.delete(address);
             }
         }
