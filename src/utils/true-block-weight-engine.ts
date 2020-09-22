@@ -923,6 +923,8 @@ export class TrueBlockWeightEngine {
                     currentBalances
                 );
             }
+            //todo
+            logger.info(`Pool Hoppers: ${poolHoppers.length}`);
 
             for (const address of validVoters) {
                 const payoutAddress: string = this.getRedirectAddress(address);
