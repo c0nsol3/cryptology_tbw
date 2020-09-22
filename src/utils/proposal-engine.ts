@@ -27,6 +27,8 @@ export class ProposalEngine {
      * @param payouts
      * @param feesPayouts
      * @param businessPayouts
+     * @param currentVoters
+     * @param currentBalances
      */
     public applyProposal(
         currentBlock: number,
@@ -34,12 +36,22 @@ export class ProposalEngine {
         smallWallets: Map<string, boolean>,
         payouts: Map<string, BigNumber>,
         feesPayouts: Map<string, BigNumber>,
-        businessPayouts: Map<string, BigNumber>
+        businessPayouts: Map<string, BigNumber>,
+        currentVoters:string[],
+        currentBalances: Map<string, BigNumber>
     ): Payouts {
         let totalPayout: BigNumber = new BigNumber(0);
         let delegateProfit: BigNumber = new BigNumber(0);
         let acfDonation: BigNumber = new BigNumber(0);
         let totalBusinessPayout: BigNumber = new BigNumber(0);
+
+        if (this.config.poolHoppingProtection) {
+            payouts = ProposalEngine.filterPoolHoppers(
+                payouts,
+                currentVoters,
+                currentBalances
+            );
+        }
 
         for (const [address, balance] of payouts) {
             if (
@@ -347,5 +359,29 @@ export class ProposalEngine {
             return 1;
         }
         return 0;
+    }
+
+    /**
+     *
+     * @param payouts
+     * @param currentVoters
+     * @param currentBalances
+     */
+    private static filterPoolHoppers(
+        payouts: Map<string, BigNumber>,
+        currentVoters: string[],
+        currentBalances: Map<string, BigNumber>
+    ): Map<string, BigNumber>  {
+
+        for (const [address, pendingBalance] of payouts) {
+            const isCurrentVoter: boolean = currentVoters.indexOf(address) >= 0;
+            const balance = currentBalances.get(address);
+            if(!isCurrentVoter || !balance || balance.lte(0) || pendingBalance.lte(0)) {
+                //todo
+                logger.warn(`Pool Hopper removed: ${address}`)
+                payouts.delete(address);
+            }
+        }
+        return new Map(payouts);
     }
 }

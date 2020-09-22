@@ -171,18 +171,24 @@ export class TrueBlockWeightEngine {
                 forgedBlocks,
                 businessRevenue,
                 previousPayouts.latestPayoutsTimeStamp,
-                processedBalances.votersBalancePerForgedBlock,
-                voters.currentVoters
+                processedBalances.votersBalancePerForgedBlock
             );
 
             logger.info("Applying Proposal.");
+            let currentBalances = processedBalances.votersBalancePerForgedBlock.get(forgedBlocks[0].height);
+            if(!currentBalances) {
+                currentBalances = new Map();
+            }
+
             const proposal: Payouts = this.proposalEngine.applyProposal(
                 currentBlock,
                 previousPayouts.latestPayouts,
                 processedBalances.smallWallets,
                 voterShares.payouts,
                 voterShares.feesPayouts,
-                voterShares.businessPayouts
+                voterShares.businessPayouts,
+                voters.currentVoters,
+                currentBalances
             );
             proposal.timestamp = timestamp;
 
@@ -872,15 +878,13 @@ export class TrueBlockWeightEngine {
      * @param businessRevenue
      * @param latestPayoutsTimeStamp
      * @param votersBalancePerForgedBlock
-     * @param currentVoters
      */
     public generateShares(
         votersPerForgedBlock: Map<number, string[]>,
         forgedBlocks: ForgedBlock[],
         businessRevenue: Map<number, BigNumber>,
         latestPayoutsTimeStamp: Map<string, BigNumber>,
-        votersBalancePerForgedBlock: Map<number, Map<string, BigNumber>>,
-        currentVoters: string[]
+        votersBalancePerForgedBlock: Map<number, Map<string, BigNumber>>
     ): PayoutBalances {
         logger.info("Starting to calculate shares...");
         const payouts: Map<string, BigNumber> = new Map();
@@ -889,10 +893,7 @@ export class TrueBlockWeightEngine {
         const latestAdminPayout: BigNumber = this.getAdminPayoutTimestamp(
             latestPayoutsTimeStamp
         );
-        let currentBalances = votersBalancePerForgedBlock.get(forgedBlocks[0].height);
-        if(!currentBalances) {
-            currentBalances = new Map();
-        }
+
         for (const item of forgedBlocks) {
             const height: number = item.height;
             const timestamp: BigNumber = item.timestamp;
@@ -914,17 +915,6 @@ export class TrueBlockWeightEngine {
                     this.sumBalances(walletBalances, validVoters)
                 );
             }
-
-            let poolHoppers = [];
-            if (this.config.poolHoppingProtection) {
-                poolHoppers = this.filterPoolHoppers(
-                    validVoters,
-                    currentVoters,
-                    currentBalances
-                );
-            }
-            //todo
-            logger.info(`Pool Hoppers: ${poolHoppers.length}`);
 
             for (const address of validVoters) {
                 const payoutAddress: string = this.getRedirectAddress(address);
@@ -996,28 +986,6 @@ export class TrueBlockWeightEngine {
         return { payouts, feesPayouts, businessPayouts };
     }
 
-    /**
-     *
-     * @param validVoters
-     * @param currentVoters
-     * @param currentBalances
-     */
-    private filterPoolHoppers(
-        validVoters: string[],
-        currentVoters: string[],
-        currentBalances: Map<string, BigNumber>
-    ) {
-        const poolHoppers = validVoters.filter((address) => {
-            const balance = currentBalances.get(address);
-            const isCurrentVoter: boolean = currentVoters.indexOf(address) >= 0;
-            return !isCurrentVoter || !balance || balance.lte(0);
-        });
-
-        //todo
-        logger.warn(`Pool Hoppers found: ${JSON.stringify(poolHoppers)}`);
-
-        return poolHoppers.slice(0);
-    }
 
     /**
      *
