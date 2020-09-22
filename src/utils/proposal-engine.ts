@@ -37,7 +37,7 @@ export class ProposalEngine {
         payouts: Map<string, BigNumber>,
         feesPayouts: Map<string, BigNumber>,
         businessPayouts: Map<string, BigNumber>,
-        currentVoters:string[],
+        currentVoters: string[],
         currentBalances: Map<string, BigNumber>
     ): Payouts {
         let totalPayout: BigNumber = new BigNumber(0);
@@ -90,7 +90,7 @@ export class ProposalEngine {
                     businessPayoutForAddress &&
                     new BigNumber(businessPayoutForAddress).gt(0)
                 ) {
-                    let businessBalance = new BigNumber(
+                    const businessBalance = new BigNumber(
                         businessPayoutForAddress
                     );
                     const businessPayout: BigNumber = new BigNumber(
@@ -371,12 +371,16 @@ export class ProposalEngine {
         payouts: Map<string, BigNumber>,
         currentVoters: string[],
         currentBalances: Map<string, BigNumber>
-    ): Map<string, BigNumber>  {
-
+    ): Map<string, BigNumber> {
         for (const [address, pendingBalance] of payouts) {
             const isCurrentVoter: boolean = currentVoters.indexOf(address) >= 0;
             const balance = currentBalances.get(address);
-            if(!isCurrentVoter || !balance || balance.lte(0) || pendingBalance.lte(0)) {
+            if (
+                !isCurrentVoter ||
+                !balance ||
+                balance.lte(0) ||
+                pendingBalance.lte(0)
+            ) {
                 payouts.delete(address);
             }
         }

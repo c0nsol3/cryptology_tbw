@@ -175,8 +175,10 @@ export class TrueBlockWeightEngine {
             );
 
             logger.info("Applying Proposal.");
-            let currentBalances = processedBalances.votersBalancePerForgedBlock.get(forgedBlocks[0].height);
-            if(!currentBalances) {
+            let currentBalances = processedBalances.votersBalancePerForgedBlock.get(
+                forgedBlocks[0].height
+            );
+            if (!currentBalances) {
                 currentBalances = new Map();
             }
 
@@ -425,7 +427,7 @@ export class TrueBlockWeightEngine {
 
         for (const transaction of delegatePayoutTransactions) {
             if (transaction.recipientId !== null) {
-                let latestPayoutForVoter = latestPayouts.get(
+                const latestPayoutForVoter = latestPayouts.get(
                     transaction.recipientId
                 );
                 if (latestPayoutForVoter) {
@@ -448,7 +450,7 @@ export class TrueBlockWeightEngine {
                 }
             } else if (transaction.multiPayment !== null) {
                 for (const receiver of transaction.multiPayment) {
-                    let latestPayoutForVoter = latestPayouts.get(
+                    const latestPayoutForVoter = latestPayouts.get(
                         receiver.recipientId
                     );
                     let height: BigNumber = new BigNumber(0);
@@ -704,7 +706,7 @@ export class TrueBlockWeightEngine {
                     }
                 }
             } else {
-                let balanceForVoterInBlock = votersBalancePerForgedBlock.get(
+                const balanceForVoterInBlock = votersBalancePerForgedBlock.get(
                     recipientId
                 );
                 if (balanceForVoterInBlock) {
@@ -721,7 +723,7 @@ export class TrueBlockWeightEngine {
                 }
             }
 
-            let balanceForVoterInBlock = votersBalancePerForgedBlock.get(
+            const balanceForVoterInBlock = votersBalancePerForgedBlock.get(
                 senderId
             );
             if (balanceForVoterInBlock) {
@@ -731,7 +733,7 @@ export class TrueBlockWeightEngine {
                     let processedStakes: Stake[] = [];
                     for (const item in voters) {
                         if (voters[item] && voters[item].address === senderId) {
-                            let processedStakesForVoter =
+                            const processedStakesForVoter =
                                 voters[item].processedStakes;
                             if (processedStakesForVoter) {
                                 processedStakes = processedStakesForVoter;
@@ -900,12 +902,12 @@ export class TrueBlockWeightEngine {
             const rewardThisBlock: BigNumber = item.reward;
             const totalFeesThisBlock: BigNumber = new BigNumber(item.fees);
             let totalBusinessIncomeThisBlock = businessRevenue.get(height);
-            if(!totalBusinessIncomeThisBlock) {
+            if (!totalBusinessIncomeThisBlock) {
                 totalBusinessIncomeThisBlock = new BigNumber(0);
             }
 
             let validVoters = votersPerForgedBlock.get(height);
-            if(!validVoters) {
+            if (!validVoters) {
                 validVoters = [];
             }
             const walletBalances = votersBalancePerForgedBlock.get(height);
@@ -918,9 +920,7 @@ export class TrueBlockWeightEngine {
 
             for (const address of validVoters) {
                 const payoutAddress: string = this.getRedirectAddress(address);
-                const latestPayout = latestPayoutsTimeStamp.get(
-                    payoutAddress
-                );
+                const latestPayout = latestPayoutsTimeStamp.get(payoutAddress);
 
                 if (
                     timestamp.gt(latestAdminPayout) &&
@@ -932,7 +932,9 @@ export class TrueBlockWeightEngine {
                         pendingPayout = new BigNumber(0);
                     }
 
-                    let voterBalance = walletBalances ? walletBalances.get(address) : undefined;
+                    const voterBalance = walletBalances
+                        ? walletBalances.get(address)
+                        : undefined;
 
                     // Only payout voters that had a balance that exceeds or equals the configured minimum balance.
                     if (
@@ -985,7 +987,6 @@ export class TrueBlockWeightEngine {
         logger.info("Finished calculating shares...");
         return { payouts, feesPayouts, businessPayouts };
     }
-
 
     /**
      *

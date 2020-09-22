@@ -248,9 +248,8 @@ export class TrueBlockWeight {
         totalAmount: BigNumber,
         timestamp: number
     ): Promise<Interfaces.ITransactionData[]> {
-
-        if(totalAmount.lte(0)) {
-            throw new Error("There is no amount to share with Admins.")
+        if (totalAmount.lte(0)) {
+            throw new Error("There is no amount to share with Admins.");
         }
 
         let payoutAmount: BigNumber = new BigNumber(0);
