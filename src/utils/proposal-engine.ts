@@ -94,6 +94,8 @@ export class ProposalEngine {
                         businessPayout
                     );
                     businessPayouts.set(address, businessPayout);
+                } else {
+                    businessPayouts.delete(address);
                 }
 
                 delegateProfit = delegateProfit.plus(delegatePayout);
