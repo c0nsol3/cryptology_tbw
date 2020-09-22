@@ -68,8 +68,6 @@ export class ProposalEngine {
                     .minus(voterPayout);
 
                 if (delegatePayout.lt(0)) {
-                    //todo
-                    logger.warn(`Delegate payout below 0: ${delegatePayout} at ${address}`);
                     voterPayout = voterPayout.minus(delegatePayout);
                     delegatePayout = new BigNumber(0);
                 }
@@ -92,6 +90,8 @@ export class ProposalEngine {
                     );
                     businessPayouts.set(address, businessPayout);
                 }
+                //todo
+                logger.warn(`DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout}`);
                 delegateProfit = delegateProfit.plus(delegatePayout);
                 acfDonation = acfDonation.plus(acfPayout);
 
