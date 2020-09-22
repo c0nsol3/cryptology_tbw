@@ -889,10 +889,10 @@ export class TrueBlockWeightEngine {
         const latestAdminPayout: BigNumber = this.getAdminPayoutTimestamp(
             latestPayoutsTimeStamp
         );
-        const currentBalances: Map<
-            string,
-            BigNumber
-        > = votersBalancePerForgedBlock.get(forgedBlocks[0].height);
+        let currentBalances = votersBalancePerForgedBlock.get(forgedBlocks[0].height);
+        if(!currentBalances) {
+            currentBalances = new Map();
+        }
         for (const item of forgedBlocks) {
             const height: number = item.height;
             const timestamp: BigNumber = item.timestamp;
@@ -907,14 +907,13 @@ export class TrueBlockWeightEngine {
             if(!validVoters) {
                 validVoters = [];
             }
-            const walletBalances: Map<
-                string,
-                BigNumber
-            > = votersBalancePerForgedBlock.get(height);
-            const balance: BigNumber = new BigNumber(
-                this.sumBalances(walletBalances, validVoters)
-            );
-
+            const walletBalances = votersBalancePerForgedBlock.get(height);
+            let balance: BigNumber = new BigNumber(0);
+            if (walletBalances) {
+                balance = new BigNumber(
+                    this.sumBalances(walletBalances, validVoters)
+                );
+            }
             if (this.config.poolHoppingProtection) {
                 validVoters = this.filterPoolHoppers(
                     validVoters,
@@ -939,7 +938,7 @@ export class TrueBlockWeightEngine {
                         pendingPayout = new BigNumber(0);
                     }
 
-                    const voterBalance = walletBalances.get(address);
+                    let voterBalance = walletBalances ? walletBalances.get(address) : undefined;
 
                     // Only payout voters that had a balance that exceeds or equals the configured minimum balance.
                     if (
