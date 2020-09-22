@@ -750,37 +750,41 @@ export class TrueBlockWeightEngine {
                 voters[item] &&
                 voters[item].hasOwnProperty("processedStakes")
             ) {
-                const stakes: Stake[] = voters[item].processedStakes;
-                const wallet: string = voters[item].address;
-                for (const stake in stakes) {
-                    if (stakes[stake].hasOwnProperty("timestamps")) {
-                        const stakeTimestamp: StakeTimestamp =
-                            stakes[stake].timestamps;
+                const stakes = voters[item].processedStakes;
+                if(stakes) {
+                    const wallet: string = voters[item].address;
+                    for (const stake in stakes) {
+                        if (stakes[stake].hasOwnProperty("timestamps")) {
+                            const stakeTimestamp: StakeTimestamp =
+                                stakes[stake].timestamps;
 
-                        let balance: BigNumber = votersBalancePerForgedBlock.get(
-                            wallet
-                        );
-
-                        if (
-                            stakeTimestamp.powerUp.lte(maxTimestamp) &&
-                            stakeTimestamp.powerUp.gt(minTimestamp)
-                        ) {
-                            balance = balance
-                                .minus(stakes[stake].power)
-                                .plus(stakes[stake].amount);
-                            votersBalancePerForgedBlock.set(wallet, balance);
-                        }
-
-                        if (
-                            stakeTimestamp.redeemable.lte(maxTimestamp) &&
-                            stakeTimestamp.redeemable.gt(minTimestamp)
-                        ) {
-                            const redeemValue: BigNumber = TrueBlockWeightEngine.getStakeRedeemValue(
-                                stakes,
-                                stakes[stake].id
+                            let balance = votersBalancePerForgedBlock.get(
+                                wallet
                             );
-                            balance = balance.plus(redeemValue);
-                            votersBalancePerForgedBlock.set(wallet, balance);
+                            if(balance) {
+
+                                if (
+                                    stakeTimestamp.powerUp.lte(maxTimestamp) &&
+                                    stakeTimestamp.powerUp.gt(minTimestamp)
+                                ) {
+                                    balance = balance
+                                        .minus(stakes[stake].power)
+                                        .plus(stakes[stake].amount);
+                                    votersBalancePerForgedBlock.set(wallet, balance);
+                                }
+
+                                if (
+                                    stakeTimestamp.redeemable.lte(maxTimestamp) &&
+                                    stakeTimestamp.redeemable.gt(minTimestamp)
+                                ) {
+                                    const redeemValue: BigNumber = TrueBlockWeightEngine.getStakeRedeemValue(
+                                        stakes,
+                                        stakes[stake].id
+                                    );
+                                    balance = balance.plus(redeemValue);
+                                    votersBalancePerForgedBlock.set(wallet, balance);
+                                }
+                            }
                         }
                     }
                 }
@@ -797,13 +801,12 @@ export class TrueBlockWeightEngine {
             const delegateAddress: string = item.address;
             const gains: BigNumber = item.fees.plus(item.reward);
 
+            let balance = votersBalancePerForgedBlock.get(delegateAddress);
             if (
                 gains.gt(0) &&
+                balance &&
                 votersBalancePerForgedBlock.has(delegateAddress)
             ) {
-                let balance = new BigNumber(
-                    votersBalancePerForgedBlock.get(delegateAddress)
-                );
                 balance = balance.minus(gains);
                 if (balance.lt(0)) {
                     balance = new BigNumber(0);
