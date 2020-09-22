@@ -91,7 +91,7 @@ export class ProposalEngine {
                     businessPayouts.set(address, businessPayout);
                 }
                 //todo
-                logger.warn(`DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout}`);
+                logger.warn(`DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout} (Shared ${percentage} %)`);
                 delegateProfit = delegateProfit.plus(delegatePayout);
                 acfDonation = acfDonation.plus(acfPayout);
 
