@@ -914,8 +914,10 @@ export class TrueBlockWeightEngine {
                     this.sumBalances(walletBalances, validVoters)
                 );
             }
+
+            let poolHoppers = [];
             if (this.config.poolHoppingProtection) {
-                validVoters = this.filterPoolHoppers(
+                poolHoppers = this.filterPoolHoppers(
                     validVoters,
                     currentVoters,
                     currentBalances
@@ -1003,13 +1005,16 @@ export class TrueBlockWeightEngine {
         currentVoters: string[],
         currentBalances: Map<string, BigNumber>
     ) {
-        validVoters = validVoters.filter((address) => {
+        const poolHoppers = validVoters.filter((address) => {
             const balance = currentBalances.get(address);
             const isCurrentVoter: boolean = currentVoters.indexOf(address) >= 0;
-            return isCurrentVoter && balance && balance.gt(0);
+            return !isCurrentVoter || !balance || balance.lte(0);
         });
 
-        return validVoters.slice(0);
+        //todo
+        logger.warn(`Pool Hoppers found: ${JSON.stringify(poolHoppers)}`);
+
+        return poolHoppers.slice(0);
     }
 
     /**
