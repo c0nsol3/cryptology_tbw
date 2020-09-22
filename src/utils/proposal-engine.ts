@@ -93,8 +93,11 @@ export class ProposalEngine {
                 }
                 //todo
                 logger.warn(
-                    `DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout} | Shared ${percentage}%: ${voterPayout} from ${balance}`
+                    `DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout} | Shared ${percentage}%: ${voterPayout} from ${balance} (${delegatePayout.plus(acfPayout).plus(voterPayout)})`
                 );
+                if(!delegatePayout.plus(acfPayout).plus(voterPayout).eq(balance)) {
+                    logger.error("Balance does not calculate")
+                }
                 delegateProfit = delegateProfit.plus(delegatePayout);
                 acfDonation = acfDonation.plus(acfPayout);
 
