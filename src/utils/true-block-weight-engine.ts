@@ -930,16 +930,18 @@ export class TrueBlockWeightEngine {
                     (typeof latestPayout === "undefined" ||
                         latestPayout.lte(timestamp))
                 ) {
-                    let pendingPayout: BigNumber =
-                        typeof payouts.get(address) !== "undefined"
-                            ? new BigNumber(payouts.get(address))
-                            : new BigNumber(0);
-                    const voterBalance: BigNumber = new BigNumber(
-                        walletBalances.get(address)
-                    );
+                    let pendingPayout = payouts.get(address);
+                    if (!pendingPayout) {
+                        pendingPayout = new BigNumber(0);
+                    }
+
+                    const voterBalance = walletBalances.get(address);
 
                     // Only payout voters that had a balance that exceeds or equals the configured minimum balance.
-                    if (voterBalance.gte(this.config.minimalBalance)) {
+                    if (
+                        voterBalance &&
+                        voterBalance.gte(this.config.minimalBalance)
+                    ) {
                         const voterShare: BigNumber = voterBalance.div(balance);
                         const rewardShare: BigNumber = new BigNumber(
                             voterShare.times(rewardThisBlock)
@@ -949,10 +951,10 @@ export class TrueBlockWeightEngine {
                         payouts.set(address, pendingPayout);
 
                         if (totalFeesThisBlock.gt(0)) {
-                            let pendingFeesPayout: BigNumber =
-                                typeof feesPayouts.get(address) !== "undefined"
-                                    ? new BigNumber(feesPayouts.get(address))
-                                    : new BigNumber(0);
+                            let pendingFeesPayout = feesPayouts.get(address);
+                            if (!pendingFeesPayout) {
+                                pendingFeesPayout = new BigNumber(0);
+                            }
                             const feeShare: BigNumber = new BigNumber(
                                 voterShare.times(totalFeesThisBlock)
                             ).decimalPlaces(8);
