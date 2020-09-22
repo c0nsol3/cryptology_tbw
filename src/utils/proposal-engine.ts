@@ -43,6 +43,7 @@ export class ProposalEngine {
 
         for (const [address, balance] of payouts) {
             if (
+                balance.gt(0) &&
                 this.isFrequencyMinimumReached(
                     address,
                     currentBlock,
@@ -91,7 +92,9 @@ export class ProposalEngine {
                     businessPayouts.set(address, businessPayout);
                 }
                 //todo
-                logger.warn(`DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout} | Shared ${percentage}%: ${voterPayout} from ${balance}`);
+                logger.warn(
+                    `DELEGATE: ${delegatePayout} | LICENSE: ${acfPayout} | Shared ${percentage}%: ${voterPayout} from ${balance}`
+                );
                 delegateProfit = delegateProfit.plus(delegatePayout);
                 acfDonation = acfDonation.plus(acfPayout);
 
@@ -282,7 +285,10 @@ export class ProposalEngine {
      * @param address
      * @param smallWallets
      */
-    public getSharePercentage(address: string, smallWallets: Map<string, boolean>): BigNumber {
+    public getSharePercentage(
+        address: string,
+        smallWallets: Map<string, boolean>
+    ): BigNumber {
         if (this.config.customShares.hasOwnProperty(address)) {
             let customShare: BigNumber = new BigNumber(
                 this.config.customShares[address]
