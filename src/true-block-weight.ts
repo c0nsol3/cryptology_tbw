@@ -288,10 +288,6 @@ export class TrueBlockWeight {
             return [];
         }
 
-        // for (const item of adminTransactions) {
-        //    const admin: string = item.recipientId;
-        //    const amount: BigNumber = new BigNumber(item.amount.toString());
-        // }
         return adminTransactions;
     }
 

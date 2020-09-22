@@ -73,31 +73,23 @@ export class ProposalEngine {
                         .times(this.config.donationShare)
                         .integerValue(BigNumber.ROUND_CEIL)
                 );
-                let voterPayout: BigNumber = new BigNumber(
+
+                const voterPayout: BigNumber = new BigNumber(
                     balance.times(percentage).integerValue(BigNumber.ROUND_DOWN)
                 );
-                let delegatePayout: BigNumber = new BigNumber(balance)
+
+                const delegatePayout: BigNumber = new BigNumber(balance)
                     .minus(acfPayout)
                     .minus(voterPayout);
-
-                if (delegatePayout.lt(0)) {
-                    voterPayout = voterPayout.minus(delegatePayout);
-                    delegatePayout = new BigNumber(0);
-                }
 
                 const businessPayoutForAddress = businessPayouts.get(address);
                 if (
                     businessPayoutForAddress &&
-                    new BigNumber(businessPayoutForAddress).gt(0)
+                    businessPayoutForAddress.gt(0)
                 ) {
-                    const businessBalance = new BigNumber(
-                        businessPayoutForAddress
-                    );
-                    const businessPayout: BigNumber = new BigNumber(
-                        businessBalance
-                            .times(this.config.voterBusinessShare)
-                            .integerValue(BigNumber.ROUND_DOWN)
-                    );
+                    const businessPayout: BigNumber = businessPayoutForAddress
+                        .times(this.config.voterBusinessShare)
+                        .integerValue(BigNumber.ROUND_DOWN);
                     totalBusinessPayout = totalBusinessPayout.plus(
                         businessPayout
                     );
