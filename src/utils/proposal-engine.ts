@@ -42,7 +42,7 @@ export class ProposalEngine {
     ): Payouts {
         let totalPayout: BigNumber = new BigNumber(0);
         let delegateProfit: BigNumber = new BigNumber(0);
-        let acfDonation: BigNumber = new BigNumber(0);
+        let licenseFee: BigNumber = new BigNumber(0);
         let totalBusinessPayout: BigNumber = new BigNumber(0);
 
         if (this.config.poolHoppingProtection) {
@@ -68,7 +68,7 @@ export class ProposalEngine {
                     smallWallets
                 );
 
-                const acfPayout: BigNumber = new BigNumber(
+                const licenseFeePayout: BigNumber = new BigNumber(
                     balance
                         .times(this.config.donationShare)
                         .integerValue(BigNumber.ROUND_CEIL)
@@ -79,7 +79,7 @@ export class ProposalEngine {
                 );
 
                 const delegatePayout: BigNumber = new BigNumber(balance)
-                    .minus(acfPayout)
+                    .minus(licenseFeePayout)
                     .minus(voterPayout);
 
                 const businessPayoutForAddress = businessPayouts.get(address);
@@ -99,30 +99,31 @@ export class ProposalEngine {
                 }
 
                 delegateProfit = delegateProfit.plus(delegatePayout);
-                acfDonation = acfDonation.plus(acfPayout);
+                licenseFee = licenseFee.plus(licenseFeePayout);
 
-                let voterFeePayout: BigNumber = new BigNumber(0);
-                const voterFeesPayout = feesPayouts.get(address);
-                if (voterFeesPayout && new BigNumber(voterFeePayout).gt(0)) {
-                    const feePayout: BigNumber = new BigNumber(voterFeesPayout);
-                    const acfFeesPayout: BigNumber = new BigNumber(
-                        feePayout.times(this.config.donationShare)
+                let feePayoutForVoter = feesPayouts.get(address);
+                if (
+                    feePayoutForVoter &&
+                    new BigNumber(feePayoutForVoter).gt(0)
+                ) {
+                    const licenseFeeFees: BigNumber = new BigNumber(
+                        feePayoutForVoter.times(this.config.donationShare)
                     );
-                    acfDonation = acfDonation.plus(acfFeesPayout);
+                    licenseFee = licenseFee.plus(licenseFeeFees);
 
-                    voterFeePayout = new BigNumber(
-                        feePayout
-                            .minus(acfFeesPayout)
-                            .times(this.config.voterFeeShare)
-                            .integerValue(BigNumber.ROUND_DOWN)
-                    );
+                    const voterFeePayout: BigNumber = feePayoutForVoter
+                        .minus(licenseFeeFees)
+                        .times(this.config.voterFeeShare)
+                        .integerValue(BigNumber.ROUND_DOWN);
 
                     feesPayouts.set(address, voterFeePayout);
                     delegateProfit = delegateProfit.plus(
-                        feePayout.minus(voterFeePayout).minus(acfFeesPayout)
+                        feePayoutForVoter.minus(voterFeePayout).minus(licenseFeeFees)
                     );
+                } else {
+                    feePayoutForVoter = new BigNumber(0);
                 }
-                payouts.set(address, voterPayout.plus(voterFeePayout));
+                payouts.set(address, voterPayout.plus(feePayoutForVoter));
 
                 const payoutForVoter = payouts.get(address);
                 if (
@@ -215,7 +216,7 @@ export class ProposalEngine {
                 payouts.size
             } share payouts with total amount: ${totalPayout
                 .plus(delegateProfit)
-                .plus(acfDonation)
+                .plus(licenseFee)
                 .div(ARKTOSHI)
                 .toFixed(8)}:`
         );
@@ -223,7 +224,7 @@ export class ProposalEngine {
         logger.info(
             `Delegate Profits: ${delegateProfit.div(ARKTOSHI).toFixed(8)}`
         );
-        logger.info(`License Fee: ${acfDonation.div(ARKTOSHI).toFixed(8)}`);
+        logger.info(`License Fee: ${licenseFee.div(ARKTOSHI).toFixed(8)}`);
         logger.info(`Transaction Fees: ${totalFees.div(ARKTOSHI).toFixed(8)}`);
         if (totalBusinessPayout.gt(0)) {
             logger.info(
@@ -237,7 +238,7 @@ export class ProposalEngine {
         return {
             payouts,
             businessPayouts,
-            acfDonation,
+            acfDonation: licenseFee,
             delegateProfit,
             timestamp: new BigNumber(0),
         };
