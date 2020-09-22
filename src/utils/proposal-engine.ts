@@ -78,8 +78,9 @@ export class ProposalEngine {
                     balance.times(percentage).integerValue(BigNumber.ROUND_DOWN)
                 );
 
+                let delegateRewardsShare: BigNumber = balance;
+
                 let voterFeesShare = feesPayouts.get(address);
-                let delegatePayout: BigNumber = new BigNumber(0);
                 if (voterFeesShare && voterFeesShare.gt(0)) {
                     const voterFeesLicenseFee: BigNumber = voterFeesShare.times(
                         this.config.donationShare
@@ -87,23 +88,20 @@ export class ProposalEngine {
                     voterLicenseFee = voterLicenseFee.plus(voterFeesLicenseFee);
 
                     const voterFeePayout: BigNumber = voterFeesShare
-                        .minus(voterFeesLicenseFee)
                         .times(this.config.voterFeeShare)
                         .integerValue(BigNumber.ROUND_DOWN);
 
                     voterRewardsShare = voterRewardsShare.plus(voterFeePayout);
-                    delegatePayout = voterFeesShare
-                        .minus(voterFeesLicenseFee)
-                        .minus(voterFeePayout);
+                    delegateRewardsShare = delegateRewardsShare.plus(
+                        voterFeesShare
+                    );
                 }
 
-                delegatePayout = delegatePayout
-                    .plus(balance)
+                delegateRewardsShare = delegateRewardsShare
                     .minus(voterLicenseFee)
                     .minus(voterRewardsShare);
 
-                totalDelegateProfit = totalDelegateProfit.plus(delegatePayout);
-                totalLicenseFee = totalLicenseFee.plus(voterLicenseFee);
+                payouts.set(address, voterRewardsShare);
 
                 const businessPayoutForAddress = businessPayouts.get(address);
                 if (
@@ -141,9 +139,11 @@ export class ProposalEngine {
                     payouts.delete(address);
                     businessPayouts.delete(address);
                 } else if (payoutForVoter) {
-                    totalPayout = totalPayout.plus(
-                        new BigNumber(payoutForVoter)
+                    totalDelegateProfit = totalDelegateProfit.plus(
+                        delegateRewardsShare
                     );
+                    totalLicenseFee = totalLicenseFee.plus(voterLicenseFee);
+                    totalPayout = totalPayout.plus(voterRewardsShare);
                 }
             } else {
                 payouts.delete(address);
