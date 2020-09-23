@@ -142,6 +142,7 @@ export class DatabaseAPI {
 
         const voters: Voter[] = [];
         logger.error(`VOTERS FROM DATABASE: ${result.rows.length}`);
+        logger.error(JSON.stringify(result.rows[0]));
         return voters;
     }
 
