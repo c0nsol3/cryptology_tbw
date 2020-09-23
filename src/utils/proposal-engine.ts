@@ -103,20 +103,6 @@ export class ProposalEngine {
 
                 payouts.set(address, voterRewardsShare);
 
-                const businessPayoutForAddress = businessPayouts.get(address);
-                let businessPayout: BigNumber = new BigNumber(0);
-                if (
-                    businessPayoutForAddress &&
-                    businessPayoutForAddress.gt(0)
-                ) {
-                    businessPayout = businessPayoutForAddress
-                        .times(this.config.voterBusinessShare)
-                        .integerValue(BigNumber.ROUND_DOWN);
-                    businessPayouts.set(address, businessPayout);
-                } else {
-                    businessPayouts.delete(address);
-                }
-
                 const payoutForVoter = payouts.get(address);
                 if (
                     payoutForVoter &&
@@ -142,9 +128,24 @@ export class ProposalEngine {
                     );
                     totalLicenseFee = totalLicenseFee.plus(voterLicenseFee);
                     totalPayout = totalPayout.plus(voterRewardsShare);
-                    totalBusinessPayout = totalBusinessPayout.plus(
-                        businessPayout
+
+                    const businessPayoutForAddress = businessPayouts.get(
+                        address
                     );
+                    if (
+                        businessPayoutForAddress &&
+                        businessPayoutForAddress.gt(0)
+                    ) {
+                        const businessPayout: BigNumber = businessPayoutForAddress
+                            .times(this.config.voterBusinessShare)
+                            .integerValue(BigNumber.ROUND_DOWN);
+                        businessPayouts.set(address, businessPayout);
+                        totalBusinessPayout = totalBusinessPayout.plus(
+                            businessPayout
+                        );
+                    } else {
+                        businessPayouts.delete(address);
+                    }
                 }
             } else {
                 payouts.delete(address);
