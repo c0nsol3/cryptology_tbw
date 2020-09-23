@@ -107,7 +107,7 @@ export class BusinessEngine {
 
                         if (transaction.recipientId === businessWallet) {
                             //todo
-                            logger.warn(`Received in MultiTX: ${amount}`)
+                            logger.warn(`Received in MultiTX: ${amount} from ${item.senderId}`)
                             amount = amount.plus(transactionAmount);
                         }
                     }
@@ -115,7 +115,7 @@ export class BusinessEngine {
                     if (recipientId === businessWallet) {
                         amount = amount.plus(item.amount);
                         //todo
-                        logger.warn(`Received in TX: ${amount}`)
+                        logger.warn(`Received in TX: ${item.amount} from ${item.senderId}`)
                     }
                 }
             }
