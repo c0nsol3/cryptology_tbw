@@ -162,8 +162,11 @@ export class ProposalEngine {
         );
 
         //todo
+        const businessFeeRation = totalBusinessPayout.minus(businessMultiPaymentFees).div(totalBusinessPayout);
+        totalBusinessPayout = totalBusinessPayout.minus(businessMultiPaymentFees);
         logger.info(`Total fees for business transfers: ${businessMultiPaymentFees.div(ARKTOSHI).toFixed(8)}`);
-        logger.info(`Business share to voters will be ${totalBusinessPayout.minus(businessMultiPaymentFees).div(ARKTOSHI.toFixed(8))}`);
+        logger.info(`Business share to voters will be ${totalBusinessPayout.div(ARKTOSHI.toFixed(8))}`);
+
         const totalFees: BigNumber = this.config.transferFee
             .times(this.getACFFeeCount())
             .plus(multiPaymentFees)
@@ -203,20 +206,15 @@ export class ProposalEngine {
                 }
             }
 
-            const businessPayoutForVoter = businessPayouts.get(address);
+            let businessPayoutForVoter = businessPayouts.get(address);
             if (businessPayoutForVoter) {
-                const fairFees: BigNumber = businessPayoutForVoter
-                    .div(totalBusinessPayout)
-                    .times(businessMultiPaymentFees);
-                let businessPayout: BigNumber = new BigNumber(
-                    businessPayoutForVoter
-                ).minus(fairFees);
-                if (businessPayout.lt(0)) {
+                businessPayoutForVoter = businessPayoutForVoter.times(businessFeeRation);
+                if (businessPayoutForVoter.lt(0)) {
                     //todo
-                    logger.warn(`Business payout too low ${businessPayout.div(ARKTOSHI)} for ${address}`);
-                    businessPayout = new BigNumber(0);
+                    logger.warn(`Business payout too low ${businessPayoutForVoter.div(ARKTOSHI)} for ${address}`);
+                    businessPayoutForVoter = new BigNumber(0);
                 }
-                businessPayouts.set(address, businessPayout);
+                businessPayouts.set(address, businessPayoutForVoter);
             }
         }
 
