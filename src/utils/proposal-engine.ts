@@ -210,21 +210,21 @@ export class ProposalEngine {
         logger.info(
             `Next payout run: ${
                 payouts.size
-            } share payouts with total amount: ${totalPayout
+            } payouts with total amount: ${totalPayout
                 .plus(totalDelegateProfit)
                 .plus(totalLicenseFee)
                 .div(ARKTOSHI)
                 .toFixed(8)}:`
         );
-        logger.info(`Voter Share: ${totalPayout.div(ARKTOSHI).toFixed(8)}`);
+        logger.info(`Voter rewards: ${totalPayout.div(ARKTOSHI).toFixed(8)}`);
         logger.info(
-            `Delegate Profits: ${totalDelegateProfit.div(ARKTOSHI).toFixed(8)}`
+            `Admin profits: ${totalDelegateProfit.div(ARKTOSHI).toFixed(8)}`
         );
-        logger.info(`License Fee: ${totalLicenseFee.div(ARKTOSHI).toFixed(8)}`);
-        logger.info(`Transaction Fees: ${totalFees.div(ARKTOSHI).toFixed(8)}`);
+        logger.info(`License fee: ${totalLicenseFee.div(ARKTOSHI).toFixed(8)}`);
+        logger.info(`Transaction fees: ${totalFees.div(ARKTOSHI).toFixed(8)}`);
         if (totalBusinessPayout.gt(0)) {
             logger.info(
-                `Business Revenue Payout: ${totalBusinessPayout
+                `Business share: ${totalBusinessPayout
                     .div(ARKTOSHI)
                     .toFixed(8)}`
             );
