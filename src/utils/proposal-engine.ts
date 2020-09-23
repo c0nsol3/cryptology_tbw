@@ -136,15 +136,9 @@ export class ProposalEngine {
                         businessPayoutForAddress &&
                         businessPayoutForAddress.gt(0)
                     ) {
-                        const businessPayout: BigNumber = businessPayoutForAddress
-                            .times(this.config.voterBusinessShare)
-                            .integerValue(BigNumber.ROUND_DOWN);
-                        businessPayouts.set(address, businessPayout);
-                        totalBusinessPayout = totalBusinessPayout.plus(
-                            businessPayout
-                        );
+
                     } else {
-                        businessPayouts.delete(address);
+                        //todo businessPayouts.delete(address);
                     }
                 }
             } else {
@@ -157,8 +151,14 @@ export class ProposalEngine {
             const willBePaid = payouts.get(address);
             if(!willBePaid || balance.lte(0)) {
                 businessPayouts.delete(address);
-                //todo
-                logger.info(`Deleted ${address} from business payouts`)
+            } else {
+                const businessPayout: BigNumber = balance
+                    .times(this.config.voterBusinessShare)
+                    .integerValue(BigNumber.ROUND_DOWN);
+                businessPayouts.set(address, businessPayout);
+                totalBusinessPayout = totalBusinessPayout.plus(
+                    businessPayout
+                );
             }
         }
 
