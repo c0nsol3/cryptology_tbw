@@ -72,13 +72,10 @@ export class Network {
             const walletInfo: APIResults = await this.getFromAPI(
                 `/api/wallets/${wallet}`
             );
-            const nonce: number =
-                walletInfo.hasOwnProperty("data") &&
+            return walletInfo.hasOwnProperty("data") &&
                 walletInfo.data.hasOwnProperty("nonce")
-                    ? parseInt(walletInfo.data.nonce, 10)
-                    : Number.NaN;
-            logger.info(`Nonce loaded for ${wallet}: ${nonce}`);
-            return nonce;
+                ? parseInt(walletInfo.data.nonce, 10)
+                : Number.NaN;
         } catch (e) {
             throw new Error(
                 `Can't load nonce for ${wallet}. Please check your node(s) configuration.`
