@@ -161,6 +161,9 @@ export class ProposalEngine {
             businessPayouts.size
         );
 
+        //todo
+        logger.info(`Total fees for business transfers: ${businessMultiPaymentFees.div(ARKTOSHI).toFixed(8)}`);
+        logger.info(`Business share to voters will be ${totalBusinessPayout.minus(businessMultiPaymentFees).div(ARKTOSHI.toFixed(8))}`);
         const totalFees: BigNumber = this.config.transferFee
             .times(this.getACFFeeCount())
             .plus(multiPaymentFees)
