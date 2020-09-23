@@ -92,6 +92,8 @@ export class TrueBlockWeight {
                         .div(ARKTOSHI)
                         .toFixed(8)}`
                 );
+                logger.info(SEPARATOR);
+                process.exit(1);
             } else {
                 logger.info(
                     `(Balance for delegate wallet: ${delegateBalance
@@ -124,6 +126,8 @@ export class TrueBlockWeight {
                             .div(ARKTOSHI)
                             .toFixed(8)}`
                     );
+                    logger.info(SEPARATOR);
+                    process.exit(1);
                 } else {
                     logger.info(
                         `(Balance for business wallet: ${businessBalance
