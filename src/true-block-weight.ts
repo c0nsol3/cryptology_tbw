@@ -160,7 +160,7 @@ export class TrueBlockWeight {
         for (const [address, amount] of payouts.payouts) {
             const wallet: string = this.getRedirectAddress(address);
             logger.info(
-                `Reward Share to ${wallet} prepared: ${amount
+                `Reward share to ${wallet} prepared: ${amount
                     .div(ARKTOSHI)
                     .toFixed(8)}`
             );
@@ -185,7 +185,7 @@ export class TrueBlockWeight {
 
                     businessReceivers.push(receiver);
                     logger.info(
-                        `Business Share to ${wallet} prepared: ${amount
+                        `Business share to ${wallet} prepared: ${amount
                             .div(ARKTOSHI)
                             .toFixed(8)}`
                     );
