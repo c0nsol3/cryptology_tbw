@@ -163,7 +163,7 @@ export class TrueBlockWeightEngine {
                 votingDelegateBlocks
             );
 
-            const businessRevenue: Map<
+            const businessRevenuePerForgedBlock: Map<
                 number,
                 BigNumber
             > = await this.businessEngine.getBusinessIncome(
@@ -176,7 +176,7 @@ export class TrueBlockWeightEngine {
             const voterShares: PayoutBalances = this.generateShares(
                 voters.votersPerForgedBlock,
                 forgedBlocks,
-                businessRevenue,
+                businessRevenuePerForgedBlock,
                 previousPayouts.latestPayoutsTimeStamp,
                 processedBalances.votersBalancePerForgedBlock
             );

@@ -84,8 +84,8 @@ export class BusinessEngine {
             const calculatedTransactions: Transaction[] = businessTransactions.filter(
                 (transaction) => {
                     return (
-                        transaction.height >= block.height &&
-                        transaction.height < previousHeight
+                        transaction.height <= block.height &&
+                        transaction.height > previousHeight
                     );
                 }
             );
