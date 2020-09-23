@@ -213,8 +213,9 @@ export class ProposalEngine {
             } payouts with total amount: ${totalPayout
                 .plus(totalDelegateProfit)
                 .plus(totalLicenseFee)
+                .plus(totalFees)
                 .div(ARKTOSHI)
-                .toFixed(8)}:`
+                .toFixed(8)}`
         );
         logger.info(`Voter rewards: ${totalPayout.div(ARKTOSHI).toFixed(8)}`);
         logger.info(
