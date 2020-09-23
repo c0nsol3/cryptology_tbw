@@ -28,7 +28,9 @@ export class TrueBlockWeight {
     public async calculate(): Promise<Transfers> {
         try {
             const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
-            logger.info(`Calculating for delegate: ${this.config.delegate} on ${networkConfig.network.client.token}`);
+            logger.info(
+                `Calculating for delegate: ${this.config.delegate} on ${networkConfig.network.client.token}`
+            );
             logger.info(SEPARATOR);
             const trueBlockWeightEngine: TrueBlockWeightEngine = new TrueBlockWeightEngine();
             const payouts: Payouts = await trueBlockWeightEngine.generatePayouts();
@@ -68,22 +70,18 @@ export class TrueBlockWeight {
 
             logger.info(SEPARATOR);
             logger.info(
-                `Ready to Payout from Delegate Account: ${transfers.totalAmount
-                    .div(ARKTOSHI)
-                    .toFixed(8)} + ${transfers.totalFees
-                    .div(ARKTOSHI)
-                    .toFixed(8)} fees.`
+                `Ready to transfer from delegate wallet: ${transfers.totalAmount
+                    .plus(transfers.totalFees)
+                    .div(ARKTOSHI)}`
             );
             if (transfers.businessTransactions.length > 0) {
                 for (const item of transfers.businessTransactions) {
                     transfers.transactions.push(item);
                 }
                 logger.info(
-                    `Ready to payout from Business Account: ${transfers.totalBusinessAmount
-                        .div(ARKTOSHI)
-                        .toFixed(8)} + ${transfers.totalBusinessFees
-                        .div(ARKTOSHI)
-                        .toFixed(8)} fees.`
+                    `Ready to transfer from business wallet: ${transfers.totalBusinessAmount
+                        .plus(transfers.totalBusinessFees)
+                        .div(ARKTOSHI)}`
                 );
             }
             logger.info(SEPARATOR);
@@ -270,9 +268,9 @@ export class TrueBlockWeight {
                 adminReceivers.push(receiver);
                 payoutAmount = payoutAmount.plus(amount);
                 logger.info(
-                    `Admin share to ${
-                        admin.wallet
-                    } prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
+                    `Admin share to ${admin.wallet} prepared: ${amount
+                        .div(ARKTOSHI)
+                        .toFixed(8)}`
                 );
             }
         }
@@ -306,9 +304,7 @@ export class TrueBlockWeight {
         if (amount.isNaN() || amount.lte(0)) {
             throw new Error("Bad license fee calculated.");
         }
-        logger.info(
-            `License fee prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
-        );
+        logger.info(`License fee prepared: ${amount.div(ARKTOSHI).toFixed(8)}`);
 
         const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
         let networkVersion: number = 88;
