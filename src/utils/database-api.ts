@@ -163,12 +163,15 @@ export class DatabaseAPI {
                         address,
                         vote: transaction.asset.votes[0],
                     };
+                    /*
                 })
                 .filter((transaction: VoterMutation) => {
                     return (
                         transaction.vote &&
                         transaction.vote.includes(`${delegatePublicKey}`)
                     );
+
+                     */
                 });
 
             logger.info(`${voterMutations.length} Voter mutations retrieved.`);
