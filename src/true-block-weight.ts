@@ -193,7 +193,7 @@ export class TrueBlockWeight {
             }
         }
 
-        let vendorField: string = `${this.config.delegate} - ${this.config.vendorField}`;
+        let vendorField: string = `${this.delegateName} - ${this.config.vendorField}`;
         const transactions: Interfaces.ITransactionData[] = await this.transactionEngine.createMultiPayment(
             receivers,
             payouts.timestamp.toNumber(),
@@ -206,7 +206,7 @@ export class TrueBlockWeight {
             this.config.multiTransferFee.times(transactions.length)
         );
 
-        vendorField = `${this.config.delegate} - Business Revenue Share.`;
+        vendorField = `${this.delegateName} - Business Revenue Share.`;
         const businessTransactions: Interfaces.ITransactionData[] = await this.transactionEngine.createMultiPayment(
             businessReceivers,
             payouts.timestamp.toNumber(),
@@ -261,7 +261,7 @@ export class TrueBlockWeight {
         for (const admin of this.config.admins) {
             if (admin.percentage && new BigNumber(admin.percentage).gt(0)) {
                 const amount: BigNumber = totalAmount.times(admin.percentage);
-                const vendorField: string = `${this.config.delegate} - ${admin.vendorField}`;
+                const vendorField: string = `${this.delegateName} - ${admin.vendorField}`;
                 const receiver: Receiver = {
                     amount,
                     vendorField,
@@ -313,7 +313,7 @@ export class TrueBlockWeight {
         if (networkConfig !== null) {
             networkVersion = networkConfig.network.pubKeyHash;
         }
-        const vendorField: string = `${this.config.delegate} - ${this.config.vendorFieldDonation}`;
+        const vendorField: string = `${this.delegateName} - ${this.config.vendorFieldDonation}`;
         const wallet: string = Identities.Address.fromPublicKey(
             PUBLICKEY,
             networkVersion

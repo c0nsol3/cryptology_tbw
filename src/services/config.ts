@@ -12,7 +12,7 @@ import {
 dotenv.config();
 
 export class Config {
-    public readonly delegate: string;
+    //public readonly delegate: string;
     public readonly transferFee: BigNumber;
     public readonly noSignature: boolean;
     public adminFees: boolean;
@@ -57,12 +57,15 @@ export class Config {
 
     constructor() {
 
+        /*
         this.delegate = process.env.DELEGATE
             ? process.env.DELEGATE.toLowerCase().trim()
             : "";
         if (this.delegate === "") {
             throw new TypeError("Invalid DELEGATE configuration");
         }
+
+         */
 
         this.noSignature = process.env.NO_VENDORFIELD
             ? parseInt(process.env.NO_VENDORFIELD, 10) > 0

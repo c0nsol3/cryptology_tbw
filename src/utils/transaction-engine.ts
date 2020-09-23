@@ -198,9 +198,10 @@ export class TransactionEngine {
         );
 
         if (Number.isNaN(this.nonce)) {
-            this.nonce = await this.network.getNonceForDelegate(
-                this.config.delegate
+            const delegateName: string = await this.network.getDelegateNameForSeed(
+                this.config.seed
             );
+            this.nonce = await this.network.getNonceForDelegate(delegateName);
         }
 
         if (

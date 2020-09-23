@@ -24,6 +24,7 @@ import { DatabaseAPI } from "./database-api";
 import { ProposalEngine } from "./proposal-engine";
 import moment from "moment";
 import { BusinessEngine } from "./business-engine";
+import { Crypto } from "./crypto";
 
 export class TrueBlockWeightEngine {
     /**
@@ -93,9 +94,7 @@ export class TrueBlockWeightEngine {
             );
             this.networkVersion = this.networkConfig.network.pubKeyHash;
 
-            const delegatePublicKey: string = await this.network.getDelegatePublicKey(
-                this.config.delegate
-            );
+            const delegatePublicKey: string = Crypto.getPublicKeyFromSeed(this.config.seed);
 
             logger.info("Retrieving Forged Blocks.");
             const forgedBlocks: ForgedBlock[] = await this.databaseAPI.getForgedBlocks(
@@ -218,7 +217,7 @@ export class TrueBlockWeightEngine {
     ): Promise<Voters> {
         logger.info("Retrieving Current Voters from API.");
         const currentVotersFromAPI: Voter[] = await this.network.getVoters(
-            this.config.delegate
+            this.config.seed
         );
         const currentVoters: string[] = TrueBlockWeightEngine.formatCurrentVoters(
             currentVotersFromAPI

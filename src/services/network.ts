@@ -129,8 +129,6 @@ export class Network {
             getWalletByPubKLeyEndpoint
         );
 
-        //todo
-        logger.info(JSON.stringify(delegateNameAPIResults.data[0]))
         if (
             delegateNameAPIResults &&
             delegateNameAPIResults.hasOwnProperty("data") &&
@@ -187,10 +185,11 @@ export class Network {
 
     /**
      *
-     * @param delegate
+     * @param seed
      */
-    public async getVoters(delegate: string): Promise<Voter[]> {
+    public async getVoters(seed: string): Promise<Voter[]> {
         try {
+            const delegate: string = await this.getDelegateNameForSeed(seed)
             const getVotersEndpoint: string = `/api/delegates/${delegate}/voters`;
             const params = {
                 page: 1,
