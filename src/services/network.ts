@@ -130,14 +130,15 @@ export class Network {
         );
 
         //todo
-        logger.info(JSON.stringify(delegateNameAPIResults.data))
+        logger.info(JSON.stringify(delegateNameAPIResults.data[0]))
         if (
             delegateNameAPIResults &&
             delegateNameAPIResults.hasOwnProperty("data") &&
-            delegateNameAPIResults.data.hasOwnProperty("username") &&
-            delegateNameAPIResults.data.username
+            delegateNameAPIResults.data.length > 0 &&
+            delegateNameAPIResults.data[0].hasOwnProperty("username") &&
+            delegateNameAPIResults.data[0].username
         ) {
-            return delegateNameAPIResults.data.username;
+            return delegateNameAPIResults.data[0].username;
         }
 
         throw new Error(
