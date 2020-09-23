@@ -130,7 +130,7 @@ export class Network {
         );
 
         //todo
-        logger.info(JSON.stringify(delegateNameAPIResults))
+        logger.info(JSON.stringify(delegateNameAPIResults.data))
         if (
             delegateNameAPIResults &&
             delegateNameAPIResults.hasOwnProperty("data") &&
