@@ -153,6 +153,15 @@ export class ProposalEngine {
             }
         }
 
+        for (const [address, balance] of businessPayouts) {
+            const willBePaid = payouts.get(address);
+            if(!willBePaid || balance.lte(0)) {
+                businessPayouts.delete(address);
+                //todo
+                logger.info(`Deleted ${address} from business payouts`)
+            }
+        }
+
         // FairFees
         const multiPaymentFees: BigNumber = this.getMultiFeesTotal(
             payouts.size

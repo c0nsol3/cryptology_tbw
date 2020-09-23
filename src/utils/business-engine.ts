@@ -3,7 +3,6 @@ import BigNumber from "bignumber.js";
 import { DatabaseConfig, ForgedBlock, Transaction } from "../interfaces";
 import { Crypto } from "./crypto";
 import { DatabaseAPI } from "./database-api";
-import { ARKTOSHI } from "../constants";
 
 export class BusinessEngine {
     private readonly config: Config;
@@ -109,10 +108,6 @@ export class BusinessEngine {
                         amount = amount.plus(item.amount);
                     }
                 }
-            }
-            //todo
-            if(amount.gt(0)) {
-                logger.warn(`BUSINESS REVENUE FOR FORGED BLOCK ${previousHeight} is ${amount.div(ARKTOSHI)}`);
             }
             revenuePerForgedBlock.set(previousHeight, amount);
             previousHeight = block.height;
