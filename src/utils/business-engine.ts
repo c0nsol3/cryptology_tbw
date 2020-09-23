@@ -112,7 +112,7 @@ export class BusinessEngine {
             }
             //todo
             if(amount.gt(0)) {
-                logger.warn(`BUSINESS REVENUE FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
+                logger.warn(`BUSINESS REVENUE FOR FORGED BLOCK ${previousHeight} is ${amount.div(ARKTOSHI)}`);
             }
             revenuePerForgedBlock.set(previousHeight, amount);
             previousHeight = block.height;
