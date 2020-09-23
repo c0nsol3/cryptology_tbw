@@ -91,11 +91,6 @@ export class BusinessEngine {
                 }
             );
 
-            if(calculatedTransactions.length) {
-                //todo
-                logger.warn(`${calculatedTransactions.length} TRANSACTIONS FOR THIS HEIGHT ${previousHeight} - ${block.height}`)
-            }
-
             let amount: BigNumber = new BigNumber(0);
             for (const item of calculatedTransactions) {
                 const recipientId: string = item.recipientId;
@@ -120,6 +115,8 @@ export class BusinessEngine {
                     }
                 }
             }
+            //todo
+            logger.warn(`BUSINESS REVENUW FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
             revenuePerForgedBlock.set(block.height, amount);
             previousHeight = block.height;
         });
