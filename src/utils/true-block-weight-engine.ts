@@ -225,6 +225,8 @@ export class TrueBlockWeightEngine {
             currentVotersFromAPI
         );
 
+        await this.databaseAPI.getCurrentVoters(delegatePublicKey);
+
         logger.info(
             `There are ${currentVoters.length} wallets currently voting.`
         );

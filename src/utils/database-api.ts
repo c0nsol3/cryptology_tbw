@@ -20,6 +20,7 @@ import {
     getTransactions,
     getVoterSinceHeight,
     getVotingDelegates,
+    getCurrentVoters,
 } from "./queries";
 
 export class DatabaseAPI {
@@ -125,6 +126,24 @@ export class DatabaseAPI {
         return delegatePayoutTransactions;
     }
 
+    public async getCurrentVoters(delegatePublicKey: string): Promise<Voter[]> {
+        const getCurrentVotersQuery: string = getCurrentVoters(
+            delegatePublicKey
+        );
+        await this.psql.connect();
+        const result: Result = await this.psql.query(getCurrentVotersQuery);
+        await this.psql.close();
+
+        if (result.rows.length === 0) {
+            logger.warn(`There are no current voters.`);
+            return [];
+        }
+
+        const voters: Voter[] = [];
+        logger.error(`VOTERS FROM DATABASE: ${result.rows.length}`);
+        return voters;
+    }
+
     /**
      * Get all the votes/unvotes for this delegate that are within range.
      * @param delegatePublicKey
@@ -150,8 +169,8 @@ export class DatabaseAPI {
         }
 
         try {
-            const voterMutations: VoterMutation[] = result.rows
-                .map((transaction: VoteTransaction) => {
+            const voterMutations: VoterMutation[] = result.rows.map(
+                (transaction: VoteTransaction) => {
                     const address: string = Crypto.getAddressFromPublicKey(
                         transaction.senderPublicKey,
                         networkVersion
@@ -172,7 +191,8 @@ export class DatabaseAPI {
                     );
 
                      */
-                });
+                }
+            );
 
             logger.info(`${voterMutations.length} Voter mutations retrieved.`);
             for (const vote in voterMutations) {

@@ -48,12 +48,26 @@ export const getVotingDelegates = (
     return query;
 };
 
+export const getCurrentVoters = (delegatePublicKey: string): string => {
+    return `SELECT * FROM ( \
+    SELECT DISTINCT ON (transactions."sender_public_key") transactions."sender_public_key" AS "senderPublicKey", \
+    transactions."asset", transactions."timestamp" \
+    FROM transactions \
+    WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
+    AND transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%' \
+    ORDER BY transactions."sender_public_key", transactions."timestamp" DESC ) t \
+    WHERE transactions."asset"->>'votes' LIKE '%+%' ORDER BY transactions."timestamp" DESC;`;
+};
+
 /**
  *
  * @param startBlockHeight
  * @param delegatePublicKey
  */
-export const getVoterSinceHeight = (startBlockHeight: number, delegatePublicKey: string): string => {
+export const getVoterSinceHeight = (
+    startBlockHeight: number,
+    delegatePublicKey: string
+): string => {
     return `SELECT transactions."asset", transactions."sender_public_key" AS "senderPublicKey", \ 
           blocks."height" \
           FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
