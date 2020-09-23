@@ -20,10 +20,10 @@ import {
     VotersPerForgedBlock,
 } from "../interfaces";
 import { Config, logger, Network } from "../services";
-import { Crypto } from "./crypto";
 import { DatabaseAPI } from "./database-api";
 import { ProposalEngine } from "./proposal-engine";
 import moment from "moment";
+import { BusinessEngine } from "./business-engine";
 
 export class TrueBlockWeightEngine {
     /**
@@ -43,6 +43,7 @@ export class TrueBlockWeightEngine {
     private readonly network: Network;
     private readonly databaseAPI: DatabaseAPI;
     private readonly proposalEngine: ProposalEngine;
+    private readonly businessEngine: BusinessEngine;
     private startBlockHeight: number;
     private readonly endBlockHeight: number;
     private networkConfig: Interfaces.INetworkConfig | undefined;
@@ -67,6 +68,7 @@ export class TrueBlockWeightEngine {
         };
         this.databaseAPI = new DatabaseAPI(databaseConfig);
         this.proposalEngine = new ProposalEngine();
+        this.businessEngine = new BusinessEngine();
     }
 
     /**
@@ -164,7 +166,12 @@ export class TrueBlockWeightEngine {
             const businessRevenue: Map<
                 number,
                 BigNumber
-            > = await this.getBusinessIncome(forgedBlocks);
+            > = await this.businessEngine.getBusinessIncome(
+                forgedBlocks,
+                this.networkVersion,
+                this.startBlockHeight,
+                this.endBlockHeight
+            );
 
             const voterShares: PayoutBalances = this.generateShares(
                 voters.votersPerForgedBlock,
@@ -475,91 +482,6 @@ export class TrueBlockWeightEngine {
             }
         }
         return { latestPayouts, latestPayoutsTimeStamp };
-    }
-
-    public async getBusinessIncome(
-        forgedBlocks: ForgedBlock[]
-    ): Promise<Map<number, BigNumber>> {
-        if (this.config.businessSeed !== "") {
-            const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
-                this.config.businessSeed
-            );
-            const businessWallet: string = Crypto.getAddressFromPublicKey(
-                businessPublicKey,
-                this.networkVersion
-            );
-            const businessTransactions: Transaction[] = await this.databaseAPI.getTransactions(
-                [businessWallet],
-                [businessPublicKey],
-                this.startBlockHeight,
-                this.endBlockHeight,
-                this.networkVersion
-            );
-            if (businessTransactions.length === 0) {
-                return new Map();
-            }
-
-            return this.getBusinessRevenuePerForgeBlock(
-                forgedBlocks,
-                businessTransactions,
-                businessWallet
-            );
-        }
-
-        return new Map();
-    }
-
-    /*
-
-     */
-    private getBusinessRevenuePerForgeBlock(
-        forgedBlocks: ForgedBlock[],
-        businessTransactions: Transaction[],
-        businessWallet: string
-    ): Map<number, BigNumber> {
-        let previousHeight: number = Number.NaN;
-        const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
-            forgedBlocks.map((block) => [block.height, new BigNumber(0)])
-        );
-        forgedBlocks.forEach((block: ForgedBlock) => {
-            if (Number.isNaN(previousHeight)) {
-                previousHeight = block.height + 1;
-            }
-
-            const calculatedTransactions: Transaction[] = businessTransactions.filter(
-                (transaction) => {
-                    return (
-                        transaction.height >= block.height &&
-                        transaction.height < previousHeight
-                    );
-                }
-            );
-
-            let amount: BigNumber = new BigNumber(0);
-            for (const item of calculatedTransactions) {
-                const recipientId: string = item.recipientId;
-
-                if (item.multiPayment !== null) {
-                    for (const transaction of item.multiPayment) {
-                        const transactionAmount: BigNumber = new BigNumber(
-                            transaction.amount.toString()
-                        );
-
-                        if (transaction.recipientId === businessWallet) {
-                            amount = amount.plus(transactionAmount);
-                        }
-                    }
-                } else {
-                    if (recipientId === businessWallet) {
-                        amount = amount.plus(item.amount);
-                    }
-                }
-            }
-            revenuePerForgedBlock.set(block.height, amount);
-            previousHeight = block.height;
-        });
-
-        return revenuePerForgedBlock;
     }
 
     /**
