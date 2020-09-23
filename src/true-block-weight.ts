@@ -271,7 +271,7 @@ export class TrueBlockWeight {
                 adminReceivers.push(receiver);
                 payoutAmount = payoutAmount.plus(amount);
                 logger.info(
-                    `Administrative Payout to ${
+                    `Admin share to ${
                         admin.wallet
                     } prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
                 );
@@ -308,7 +308,7 @@ export class TrueBlockWeight {
             throw new Error("Bad license fee calculated.");
         }
         logger.info(
-            `License fee payout prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
+            `License fee prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
         );
 
         const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
