@@ -193,7 +193,6 @@ export class TrueBlockWeight {
             }
         }
 
-        logger.info(SEPARATOR);
         let vendorField: string = `${this.config.delegate} - ${this.config.vendorField}`;
         const transactions: Interfaces.ITransactionData[] = await this.transactionEngine.createMultiPayment(
             receivers,
