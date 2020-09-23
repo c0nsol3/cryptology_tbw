@@ -131,7 +131,6 @@ export class DatabaseAPI {
             delegatePublicKey
         );
 
-        logger.info(getCurrentVotersQuery)
         await this.psql.connect();
         const result: Result = await this.psql.query(getCurrentVotersQuery);
         await this.psql.close();
