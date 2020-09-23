@@ -3,6 +3,7 @@ import BigNumber from "bignumber.js";
 import { DatabaseConfig, ForgedBlock, Transaction } from "../interfaces";
 import { Crypto } from "./crypto";
 import { DatabaseAPI } from "./database-api";
+import { ARKTOSHI } from "../constants";
 
 export class BusinessEngine {
     private readonly config: Config;
@@ -107,7 +108,7 @@ export class BusinessEngine {
 
                         if (transaction.recipientId === businessWallet) {
                             //todo
-                            logger.warn(`Received in MultiTX: ${amount} from ${item.senderId}`)
+                            logger.warn(`Received in MultiTX: ${transactionAmount.div(ARKTOSHI)} from ${item.senderId}`)
                             amount = amount.plus(transactionAmount);
                         }
                     }
@@ -115,7 +116,7 @@ export class BusinessEngine {
                     if (recipientId === businessWallet) {
                         amount = amount.plus(item.amount);
                         //todo
-                        logger.warn(`Received in TX: ${item.amount} from ${item.senderId}`)
+                        logger.warn(`Received in TX: ${item.amount.div(ARKTOSHI)} from ${item.senderId}`)
                     }
                 }
             }
