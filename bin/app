@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-import { SEPARATOR } from "../src/constants";
-
 const { logger } = require("../dist/services");
 const { SEPARATOR } = require("../dist/constants");
 
