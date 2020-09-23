@@ -80,7 +80,7 @@ export class ProposalEngine {
 
                 let delegateRewardsShare: BigNumber = balance;
 
-                let voterFeesShare = feesPayouts.get(address);
+                const voterFeesShare = feesPayouts.get(address);
                 if (voterFeesShare && voterFeesShare.gt(0)) {
                     const voterFeesLicenseFee: BigNumber = voterFeesShare.times(
                         this.config.donationShare
@@ -137,16 +137,14 @@ export class ProposalEngine {
 
         for (const [address, balance] of businessPayouts) {
             const willBePaid = payouts.get(address);
-            if(!willBePaid || balance.lte(0)) {
+            if (!willBePaid || balance.lte(0)) {
                 businessPayouts.delete(address);
             } else {
                 const businessPayout: BigNumber = balance
                     .times(this.config.voterBusinessShare)
                     .integerValue(BigNumber.ROUND_DOWN);
                 businessPayouts.set(address, businessPayout);
-                totalBusinessPayout = totalBusinessPayout.plus(
-                    businessPayout
-                );
+                totalBusinessPayout = totalBusinessPayout.plus(businessPayout);
             }
         }
 

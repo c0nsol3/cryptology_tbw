@@ -139,9 +139,7 @@ export class Network {
             return new BigNumber(delegateNameAPIResults.data[0].balance);
         }
 
-        throw new Error(
-            "Could not retrieve wallet balance."
-        );
+        throw new Error("Could not retrieve wallet balance.");
     }
 
     public async getDelegateNameForSeed(seed: string): Promise<string> {
@@ -211,7 +209,7 @@ export class Network {
      */
     public async getVoters(seed: string): Promise<Voter[]> {
         try {
-            const delegate: string = await this.getDelegateNameForSeed(seed)
+            const delegate: string = await this.getDelegateNameForSeed(seed);
             const getVotersEndpoint: string = `/api/delegates/${delegate}/voters`;
             const params = {
                 page: 1,

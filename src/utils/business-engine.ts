@@ -48,7 +48,7 @@ export class BusinessEngine {
                 businessPublicKey,
                 networkVersion
             );
-            logger.info("Retrieving business revenue transactions.")
+            logger.info("Retrieving business revenue transactions.");
             const businessTransactions: Transaction[] = await this.databaseAPI.getTransactions(
                 [businessWallet],
                 [businessPublicKey],
@@ -75,7 +75,8 @@ export class BusinessEngine {
         businessTransactions: Transaction[],
         businessWallet: string
     ): Map<number, BigNumber> {
-        let previousHeight: number = forgedBlocks[forgedBlocks.length - 1].height + 1;
+        let previousHeight: number =
+            forgedBlocks[forgedBlocks.length - 1].height + 1;
         const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
             forgedBlocks.map((block) => [block.height, new BigNumber(0)])
         );
@@ -93,7 +94,10 @@ export class BusinessEngine {
             for (const item of calculatedTransactions) {
                 const recipientId: string = item.recipientId;
 
-                if (item.multiPayment !== null && this.config.businessShareMultiTransactionIncome ) {
+                if (
+                    item.multiPayment !== null &&
+                    this.config.businessShareMultiTransactionIncome
+                ) {
                     for (const transaction of item.multiPayment) {
                         const transactionAmount: BigNumber = new BigNumber(
                             transaction.amount.toString()
@@ -103,7 +107,7 @@ export class BusinessEngine {
                             amount = amount.plus(transactionAmount);
                         }
                     }
-                } else if(!item.multiPayment) {
+                } else if (!item.multiPayment) {
                     if (recipientId === businessWallet) {
                         amount = amount.plus(item.amount);
                     }

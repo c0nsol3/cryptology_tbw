@@ -94,7 +94,9 @@ export class TrueBlockWeightEngine {
             );
             this.networkVersion = this.networkConfig.network.pubKeyHash;
 
-            const delegatePublicKey: string = Crypto.getPublicKeyFromSeed(this.config.seed);
+            const delegatePublicKey: string = Crypto.getPublicKeyFromSeed(
+                this.config.seed
+            );
 
             logger.info("Retrieving Forged Blocks.");
             const forgedBlocks: ForgedBlock[] = await this.databaseAPI.getForgedBlocks(

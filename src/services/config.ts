@@ -55,7 +55,6 @@ export class Config {
     public transactionsPerMultitransfer: number;
 
     constructor() {
-
         this.noSignature = process.env.NO_VENDORFIELD
             ? parseInt(process.env.NO_VENDORFIELD, 10) > 0
             : false;
