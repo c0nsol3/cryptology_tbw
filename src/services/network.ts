@@ -122,6 +122,28 @@ export class Network {
         throw new Error("Could not connect to any of the configured nodes.");
     }
 
+    public async getBalanceForSeed(seed: string): Promise<BigNumber> {
+        const publicKey: string = Crypto.getPublicKeyFromSeed(seed);
+        const getWalletByPubKLeyEndpoint: string = `/api/wallets?publicKey=${publicKey}`;
+        const delegateNameAPIResults: APIResults = await this.getFromAPI(
+            getWalletByPubKLeyEndpoint
+        );
+
+        if (
+            delegateNameAPIResults &&
+            delegateNameAPIResults.hasOwnProperty("data") &&
+            delegateNameAPIResults.data.length > 0 &&
+            delegateNameAPIResults.data[0].hasOwnProperty("balance") &&
+            delegateNameAPIResults.data[0].balance
+        ) {
+            return new BigNumber(delegateNameAPIResults.data[0].balance);
+        }
+
+        throw new Error(
+            "Could not retrieve wallet balance."
+        );
+    }
+
     public async getDelegateNameForSeed(seed: string): Promise<string> {
         const publicKey: string = Crypto.getPublicKeyFromSeed(seed);
         const getWalletByPubKLeyEndpoint: string = `/api/wallets?publicKey=${publicKey}`;
