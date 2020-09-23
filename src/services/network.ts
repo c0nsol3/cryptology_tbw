@@ -238,8 +238,6 @@ export class Network {
             if (voters.length === 0) {
                 logger.warn(`There are no current voters for ${delegate!}`);
             }
-            //todo
-            logger.error(JSON.stringify(voters[0]));
             return voters;
         } catch (e) {
             throw e;
