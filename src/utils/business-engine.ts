@@ -116,7 +116,9 @@ export class BusinessEngine {
                 }
             }
             //todo
-            logger.warn(`BUSINESS REVENUW FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
+            if(amount.gt(0)) {
+                logger.warn(`BUSINESS REVENUW FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
+            }
             revenuePerForgedBlock.set(block.height, amount);
             previousHeight = block.height;
         });
