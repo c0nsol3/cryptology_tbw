@@ -48,9 +48,10 @@ export const getVotingDelegates = (
     return query;
 };
 
-export const getCurrentVoters = (delegatePublicKey: string): string => {
+export const getCurrentVotersSince = (delegatePublicKey: string): string => {
     return `SELECT * FROM ( \
-    SELECT DISTINCT ON (transactions."sender_public_key") transactions."sender_public_key" AS "senderPublicKey", * \
+    SELECT DISTINCT ON (transactions."sender_public_key") transactions."sender_public_key" AS "senderPublicKey", \
+    transactions."asset", transactions."timestamp" \
     FROM transactions \
     WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
     AND transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%' \

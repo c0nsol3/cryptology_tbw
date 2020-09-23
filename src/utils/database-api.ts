@@ -20,7 +20,7 @@ import {
     getTransactions,
     getVoterSinceHeight,
     getVotingDelegates,
-    getCurrentVoters,
+    getCurrentVotersSince,
 } from "./queries";
 
 export class DatabaseAPI {
@@ -127,7 +127,7 @@ export class DatabaseAPI {
     }
 
     public async getCurrentVoters(delegatePublicKey: string): Promise<Voter[]> {
-        const getCurrentVotersQuery: string = getCurrentVoters(
+        const getCurrentVotersQuery: string = getCurrentVotersSince(
             delegatePublicKey
         );
 
@@ -140,9 +140,8 @@ export class DatabaseAPI {
             return [];
         }
 
+        //todo
         const voters: Voter[] = [];
-        logger.error(`VOTERS FROM DATABASE: ${result.rows.length}`);
-        logger.error(JSON.stringify(result.rows[0]));
         return voters;
     }
 
