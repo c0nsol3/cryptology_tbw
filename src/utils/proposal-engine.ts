@@ -162,10 +162,22 @@ export class ProposalEngine {
         );
 
         //todo
-        const businessFeeRation = totalBusinessPayout.minus(businessMultiPaymentFees).div(totalBusinessPayout);
-        totalBusinessPayout = totalBusinessPayout.minus(businessMultiPaymentFees);
-        logger.info(`Total fees for business transfers: ${businessMultiPaymentFees.div(ARKTOSHI).toFixed(8)}`);
-        logger.info(`Business share to voters will be ${totalBusinessPayout.div(ARKTOSHI.toFixed(8))}`);
+        const businessFeeRation = totalBusinessPayout
+            .minus(businessMultiPaymentFees)
+            .div(totalBusinessPayout);
+        totalBusinessPayout = totalBusinessPayout.minus(
+            businessMultiPaymentFees
+        );
+        logger.info(
+            `Total fees for business transfers: ${businessMultiPaymentFees
+                .div(ARKTOSHI)
+                .toFixed(8)}`
+        );
+        logger.info(
+            `Business share to voters will be ${totalBusinessPayout.div(
+                ARKTOSHI.toFixed(8)
+            )}`
+        );
 
         const totalFees: BigNumber = this.config.transferFee
             .times(this.getACFFeeCount())
@@ -208,10 +220,16 @@ export class ProposalEngine {
 
             let businessPayoutForVoter = businessPayouts.get(address);
             if (businessPayoutForVoter) {
-                businessPayoutForVoter = businessPayoutForVoter.times(businessFeeRation);
+                businessPayoutForVoter = businessPayoutForVoter.times(
+                    businessFeeRation
+                );
                 if (businessPayoutForVoter.lt(0)) {
                     //todo
-                    logger.warn(`Business payout too low ${businessPayoutForVoter.div(ARKTOSHI)} for ${address}`);
+                    logger.warn(
+                        `Business payout too low ${businessPayoutForVoter.div(
+                            ARKTOSHI
+                        )} for ${address}`
+                    );
                     businessPayoutForVoter = new BigNumber(0);
                 }
                 businessPayouts.set(address, businessPayoutForVoter);
@@ -236,8 +254,22 @@ export class ProposalEngine {
         logger.info(`License fee: ${totalLicenseFee.div(ARKTOSHI).toFixed(8)}`);
         logger.info(`Transaction fees: ${totalFees.div(ARKTOSHI).toFixed(8)}`);
         if (totalBusinessPayout.gt(0)) {
+            logger.info(SEPARATOR);
             logger.info(
-                `Business share: ${totalBusinessPayout
+                `Business revenue payout run: ${
+                    businessPayouts.size
+                } payouts with total amount: ${totalBusinessPayout
+                    .plus(businessMultiPaymentFees)
+                    .div(ARKTOSHI)
+                    .toFixed(8)}`
+            );
+            logger.info(
+                `Business shares: ${totalBusinessPayout
+                    .div(ARKTOSHI)
+                    .toFixed(8)}`
+            );
+            logger.info(
+                `Business transaction fees: ${businessMultiPaymentFees
                     .div(ARKTOSHI)
                     .toFixed(8)}`
             );
