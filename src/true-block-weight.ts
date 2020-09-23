@@ -10,7 +10,7 @@ export class TrueBlockWeight {
     private readonly config: Config;
     private readonly network: Network;
     private transactionEngine: TransactionEngine;
-    private delegateName: string;
+    private delegateName: string = "";
 
     constructor() {
         try {
