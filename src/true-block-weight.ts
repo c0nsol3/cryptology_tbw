@@ -28,6 +28,7 @@ export class TrueBlockWeight {
     public async calculate(): Promise<Transfers> {
         try {
             logger.info(`Calculating for delegate: ${this.config.delegate}`);
+            logger.info(SEPARATOR);
             const trueBlockWeightEngine: TrueBlockWeightEngine = new TrueBlockWeightEngine();
             const payouts: Payouts = await trueBlockWeightEngine.generatePayouts();
             const transfers: Transfers = await this.generateTransactions(
