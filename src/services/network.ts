@@ -129,6 +129,8 @@ export class Network {
             getWalletByPubKLeyEndpoint
         );
 
+        //todo
+        logger.info(JSON.stringify(delegateNameAPIResults))
         if (
             delegateNameAPIResults &&
             delegateNameAPIResults.hasOwnProperty("data") &&
