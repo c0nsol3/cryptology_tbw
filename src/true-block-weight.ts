@@ -10,6 +10,7 @@ export class TrueBlockWeight {
     private readonly config: Config;
     private readonly network: Network;
     private transactionEngine: TransactionEngine;
+    private delegateName: string;
 
     constructor() {
         try {
@@ -28,8 +29,9 @@ export class TrueBlockWeight {
     public async calculate(): Promise<Transfers> {
         try {
             const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
+            this.delegateName = await this.network.getDelegateNameForSeed(this.config.seed);
             logger.info(
-                `Calculating for delegate: ${this.config.delegate} on ${networkConfig.network.client.token}`
+                `Calculating for delegate: ${this.delegateName} on ${networkConfig.network.client.token}`
             );
             logger.info(SEPARATOR);
             const trueBlockWeightEngine: TrueBlockWeightEngine = new TrueBlockWeightEngine();

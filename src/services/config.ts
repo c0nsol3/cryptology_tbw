@@ -56,6 +56,7 @@ export class Config {
     public transactionsPerMultitransfer: number;
 
     constructor() {
+
         this.delegate = process.env.DELEGATE
             ? process.env.DELEGATE.toLowerCase().trim()
             : "";

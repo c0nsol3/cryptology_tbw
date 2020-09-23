@@ -10,6 +10,7 @@ import {
     VoterMutation,
 } from "../interfaces";
 import { logger } from "./";
+import { Crypto } from "../utils";
 
 export class Network {
     private readonly server: string;
@@ -119,6 +120,27 @@ export class Network {
         }
 
         throw new Error("Could not connect to any of the configured nodes.");
+    }
+
+    public async getDelegateNameForSeed(seed: string): Promise<string> {
+        const publicKey: string = Crypto.getPublicKeyFromSeed(seed);
+        const getWalletByPubKLeyEndpoint: string = `/api/wallets?publicKey=${publicKey}`;
+        const delegateNameAPIResults: APIResults = await this.getFromAPI(
+            getWalletByPubKLeyEndpoint
+        );
+
+        if (
+            delegateNameAPIResults &&
+            delegateNameAPIResults.hasOwnProperty("data") &&
+            delegateNameAPIResults.data.hasOwnProperty("username") &&
+            delegateNameAPIResults.data.username
+        ) {
+            return delegateNameAPIResults.data.username;
+        }
+
+        throw new Error(
+            "Could not retrieve delegate data: does the configured seed belong to a delegate wallet?"
+        );
     }
 
     /**
