@@ -168,6 +168,7 @@ export class ProposalEngine {
         totalBusinessPayout = totalBusinessPayout.minus(
             businessMultiPaymentFees
         );
+        logger.error(`PAYOUTS SIZE: ${payouts.size} BUSINESS SIZE: ${businessPayouts.size}`)
         logger.info(
             `Total fees for business transfers: ${businessMultiPaymentFees
                 .div(ARKTOSHI)
