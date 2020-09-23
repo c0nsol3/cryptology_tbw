@@ -94,9 +94,9 @@ export class TrueBlockWeight {
                 );
             } else {
                 logger.info(
-                    `Balance for delegate wallet: ${delegateBalance
+                    `(Balance for delegate wallet: ${delegateBalance
                         .div(ARKTOSHI)
-                        .toFixed(8)}`
+                        .toFixed(8)})`
                 );
             }
             if (transfers.businessTransactions.length > 0) {
@@ -108,28 +108,29 @@ export class TrueBlockWeight {
                         .plus(transfers.totalBusinessFees)
                         .div(ARKTOSHI)}`
                 );
-            }
-            const businessBalance: BigNumber = await this.network.getBalanceForSeed(
-                this.config.businessSeed
-            );
-            if (
-                businessBalance.lt(
-                    transfers.totalBusinessAmount.plus(
-                        transfers.totalBusinessFees
+
+                const businessBalance: BigNumber = await this.network.getBalanceForSeed(
+                    this.config.businessSeed
+                );
+                if (
+                    businessBalance.lt(
+                        transfers.totalBusinessAmount.plus(
+                            transfers.totalBusinessFees
+                        )
                     )
-                )
-            ) {
-                logger.error(
-                    `Balance of business wallet is not sufficient! Balance: ${businessBalance
-                        .div(ARKTOSHI)
-                        .toFixed(8)}`
-                );
-            } else {
-                logger.info(
-                    `Balance for business wallet: ${businessBalance
-                        .div(ARKTOSHI)
-                        .toFixed(8)}`
-                );
+                ) {
+                    logger.error(
+                        `Balance of business wallet is not sufficient! Balance: ${businessBalance
+                            .div(ARKTOSHI)
+                            .toFixed(8)}`
+                    );
+                } else {
+                    logger.info(
+                        `(Balance for business wallet: ${businessBalance
+                            .div(ARKTOSHI)
+                            .toFixed(8)})`
+                    );
+                }
             }
             logger.info(SEPARATOR);
 
