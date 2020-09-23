@@ -209,6 +209,8 @@ export class ProposalEngine {
                     businessPayoutForVoter
                 ).minus(fairFees);
                 if (businessPayout.lt(0)) {
+                    //todo
+                    logger.warn(`Business payout too low ${businessPayout.div(ARKTOSHI)} for ${address}`);
                     businessPayout = new BigNumber(0);
                 }
                 businessPayouts.set(address, businessPayout);
