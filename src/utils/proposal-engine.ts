@@ -157,6 +157,10 @@ export class ProposalEngine {
         const multiPaymentFees: BigNumber = this.getMultiFeesTotal(
             payouts.size
         );
+        const businessMultiPaymentFees: BigNumber = this.getMultiFeesTotal(
+            businessPayouts.size
+        );
+
         const totalFees: BigNumber = this.config.transferFee
             .times(this.getACFFeeCount())
             .plus(multiPaymentFees)
@@ -198,6 +202,9 @@ export class ProposalEngine {
 
             const businessPayoutForVoter = businessPayouts.get(address);
             if (businessPayoutForVoter) {
+                const fairFees: BigNumber = businessPayoutForVoter
+                    .div(totalBusinessPayout)
+                    .times(businessMultiPaymentFees);
                 let businessPayout: BigNumber = new BigNumber(
                     businessPayoutForVoter
                 ).minus(fairFees);
