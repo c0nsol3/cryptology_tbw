@@ -1,10 +1,15 @@
 #!/usr/bin/env node
+import { SEPARATOR } from "../src/constants";
+
 const { logger } = require("../dist/services");
+const { SEPARATOR } = require("../dist/constants");
+
 const { TrueBlockWeight } = require("../dist");
 const { version } = require("../package.json");
 const args = process.argv.slice(2);
 
 try {
+  logger.info(SEPARATOR);
   logger.info(`Cryptology TBW version ${version}`);
   const trueBlockWeight = new TrueBlockWeight();
   if (args.length >= 1 && args[0] === "payout") {
