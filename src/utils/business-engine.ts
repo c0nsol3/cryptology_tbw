@@ -49,6 +49,7 @@ export class BusinessEngine {
                 businessPublicKey,
                 networkVersion
             );
+            logger.info("Retrieving business revenue transactions.")
             const businessTransactions: Transaction[] = await this.databaseAPI.getTransactions(
                 [businessWallet],
                 [businessPublicKey],
@@ -75,8 +76,6 @@ export class BusinessEngine {
         businessTransactions: Transaction[],
         businessWallet: string
     ): Map<number, BigNumber> {
-        //todo
-        logger.warn(`CALCULATING BUSINESS from height ${forgedBlocks[0].height} - ${forgedBlocks[forgedBlocks.length-1].height}`)
         let previousHeight: number = forgedBlocks[forgedBlocks.length - 1].height + 1;
         const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
             forgedBlocks.map((block) => [block.height, new BigNumber(0)])
@@ -102,22 +101,18 @@ export class BusinessEngine {
                         );
 
                         if (transaction.recipientId === businessWallet) {
-                            //todo
-                            logger.warn(`Received in MultiTX: ${transactionAmount.div(ARKTOSHI)} from ${item.senderId}`)
                             amount = amount.plus(transactionAmount);
                         }
                     }
                 } else if(!item.multiPayment) {
                     if (recipientId === businessWallet) {
                         amount = amount.plus(item.amount);
-                        //todo
-                        logger.warn(`Received in TX: ${item.amount.div(ARKTOSHI)} from ${item.senderId}`)
                     }
                 }
             }
             //todo
             if(amount.gt(0)) {
-                logger.warn(`BUSINESS REVENUW FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
+                logger.warn(`BUSINESS REVENUE FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
             }
             revenuePerForgedBlock.set(block.height, amount);
             previousHeight = block.height;
