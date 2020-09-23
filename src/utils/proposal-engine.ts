@@ -128,18 +128,6 @@ export class ProposalEngine {
                     );
                     totalLicenseFee = totalLicenseFee.plus(voterLicenseFee);
                     totalPayout = totalPayout.plus(voterRewardsShare);
-
-                    const businessPayoutForAddress = businessPayouts.get(
-                        address
-                    );
-                    if (
-                        businessPayoutForAddress &&
-                        businessPayoutForAddress.gt(0)
-                    ) {
-
-                    } else {
-                        //todo businessPayouts.delete(address);
-                    }
                 }
             } else {
                 payouts.delete(address);
@@ -170,23 +158,11 @@ export class ProposalEngine {
             businessPayouts.size
         );
 
-        //todo
         const businessFeeRation = totalBusinessPayout
             .minus(businessMultiPaymentFees)
             .div(totalBusinessPayout);
         totalBusinessPayout = totalBusinessPayout.minus(
             businessMultiPaymentFees
-        );
-        logger.error(`PAYOUTS SIZE: ${payouts.size} BUSINESS SIZE: ${businessPayouts.size}`)
-        logger.info(
-            `Total fees for business transfers: ${businessMultiPaymentFees
-                .div(ARKTOSHI)
-                .toFixed(8)}`
-        );
-        logger.info(
-            `Business share to voters will be ${totalBusinessPayout.div(
-                ARKTOSHI.toFixed(8)
-            )}`
         );
 
         const totalFees: BigNumber = this.config.transferFee
@@ -234,15 +210,10 @@ export class ProposalEngine {
                     businessFeeRation
                 );
                 if (businessPayoutForVoter.lt(0)) {
-                    //todo
-                    logger.warn(
-                        `Business payout too low ${businessPayoutForVoter.div(
-                            ARKTOSHI
-                        )} for ${address}`
-                    );
-                    businessPayoutForVoter = new BigNumber(0);
+                    businessPayouts.delete(address);
+                } else {
+                    businessPayouts.set(address, businessPayoutForVoter);
                 }
-                businessPayouts.set(address, businessPayoutForVoter);
             }
         }
 
