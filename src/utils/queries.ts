@@ -56,7 +56,7 @@ export const getCurrentVoters = (delegatePublicKey: string): string => {
     WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
     AND transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%' \
     ORDER BY transactions."sender_public_key", transactions."timestamp" DESC ) t \
-    WHERE transactions."asset"->>'votes' LIKE '%+%' ORDER BY transactions."timestamp" DESC;`;
+    WHERE t."asset"->>'votes' LIKE '%+%' ORDER BY t."timestamp" DESC;`;
 };
 
 /**
