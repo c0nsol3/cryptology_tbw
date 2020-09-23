@@ -100,7 +100,7 @@ export class BusinessEngine {
             for (const item of calculatedTransactions) {
                 const recipientId: string = item.recipientId;
 
-                if (item.multiPayment !== null) {
+                if (item.multiPayment !== null && this.config.businessShareMultiTransactionIncome ) {
                     for (const transaction of item.multiPayment) {
                         const transactionAmount: BigNumber = new BigNumber(
                             transaction.amount.toString()
@@ -112,7 +112,7 @@ export class BusinessEngine {
                             amount = amount.plus(transactionAmount);
                         }
                     }
-                } else {
+                } else if(!item.multiPayment) {
                     if (recipientId === businessWallet) {
                         amount = amount.plus(item.amount);
                         //todo

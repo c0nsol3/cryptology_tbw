@@ -20,6 +20,7 @@ export class Config {
     public readonly voterShare: BigNumber;
     public readonly voterFeeShare: BigNumber;
     public readonly voterBusinessShare: BigNumber;
+    public readonly businessShareMultiTransactionIncome: boolean;
     public readonly minimalPayoutValue: BigNumber;
     public readonly donationShare: BigNumber;
     public readonly minimalBalance: BigNumber;
@@ -122,6 +123,11 @@ export class Config {
         ) {
             throw new TypeError("Invalid PAYOUT_BUSINESS configuration");
         }
+
+        this.businessShareMultiTransactionIncome = process.env
+            .BUSINESS_SHARE_MULTITX_INCOME
+            ? parseInt(process.env.BUSINESS_SHARE_MULTITX_INCOME, 10) > 0
+            : false;
 
         this.minimalPayoutValue = process.env.MIN_PAYOUT_VALUE
             ? new BigNumber(process.env.MIN_PAYOUT_VALUE).times(ARKTOSHI)
