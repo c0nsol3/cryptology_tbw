@@ -99,6 +99,8 @@ export class BusinessEngine {
             for (const item of calculatedTransactions) {
                 const recipientId: string = item.recipientId;
 
+                //todo
+                logger.warn(`TRANSACTION: ${JSON.stringify(item)}`);
                 if (item.multiPayment !== null) {
                     for (const transaction of item.multiPayment) {
                         const transactionAmount: BigNumber = new BigNumber(
