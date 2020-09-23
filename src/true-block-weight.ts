@@ -27,7 +27,8 @@ export class TrueBlockWeight {
      */
     public async calculate(): Promise<Transfers> {
         try {
-            logger.info(`Calculating for delegate: ${this.config.delegate}`);
+            const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
+            logger.info(`Calculating for delegate: ${this.config.delegate} on ${networkConfig.network.client.token}`);
             logger.info(SEPARATOR);
             const trueBlockWeightEngine: TrueBlockWeightEngine = new TrueBlockWeightEngine();
             const payouts: Payouts = await trueBlockWeightEngine.generatePayouts();
