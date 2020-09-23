@@ -76,7 +76,7 @@ export class BusinessEngine {
         businessTransactions: Transaction[],
         businessWallet: string
     ): Map<number, BigNumber> {
-        let previousHeight: number = forgedBlocks[forgedBlocks.length - 1].height + 1;
+        let previousHeight: number = forgedBlocks[0].height + 1;
         const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
             forgedBlocks.map((block) => [block.height, new BigNumber(0)])
         );
