@@ -160,7 +160,7 @@ export class TrueBlockWeight {
         for (const [address, amount] of payouts.payouts) {
             const wallet: string = this.getRedirectAddress(address);
             logger.info(
-                `Delegate Share to ${wallet} prepared: ${amount
+                `Reward Share to ${wallet} prepared: ${amount
                     .div(ARKTOSHI)
                     .toFixed(8)}`
             );
@@ -193,6 +193,7 @@ export class TrueBlockWeight {
             }
         }
 
+        logger.info(SEPARATOR);
         let vendorField: string = `${this.config.delegate} - ${this.config.vendorField}`;
         const transactions: Interfaces.ITransactionData[] = await this.transactionEngine.createMultiPayment(
             receivers,
