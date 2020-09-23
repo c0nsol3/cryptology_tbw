@@ -76,7 +76,7 @@ export class BusinessEngine {
         businessTransactions: Transaction[],
         businessWallet: string
     ): Map<number, BigNumber> {
-        let previousHeight: number = forgedBlocks[0].height + 1;
+        let previousHeight: number = forgedBlocks[forgedBlocks.length - 1].height + 1;
         const revenuePerForgedBlock: Map<number, BigNumber> = new Map(
             forgedBlocks.map((block) => [block.height, new BigNumber(0)])
         );
@@ -84,8 +84,8 @@ export class BusinessEngine {
             const calculatedTransactions: Transaction[] = businessTransactions.filter(
                 (transaction) => {
                     return (
-                        transaction.height <= block.height &&
-                        transaction.height > previousHeight
+                        transaction.height >= block.height &&
+                        transaction.height < previousHeight
                     );
                 }
             );
@@ -114,7 +114,7 @@ export class BusinessEngine {
             if(amount.gt(0)) {
                 logger.warn(`BUSINESS REVENUE FOR FORGED BLOCK ${block.height} is ${amount.div(ARKTOSHI)}`);
             }
-            revenuePerForgedBlock.set(block.height, amount);
+            revenuePerForgedBlock.set(previousHeight, amount);
             previousHeight = block.height;
         });
 
