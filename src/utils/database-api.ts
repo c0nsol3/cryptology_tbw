@@ -11,7 +11,7 @@ import {
     VoterBlock,
     VoterMutation,
     VoterSinceTransaction,
-    VotersSince,
+    VoterDuration,
     VoteTransaction,
 } from "../interfaces";
 import { logger, Postgres } from "../services";
@@ -147,7 +147,7 @@ export class DatabaseAPI {
         }
 
         try {
-            const voters: VotersSince[] = result.rows.map(
+            const voters: VoterDuration[] = result.rows.map(
                 (transaction: VoterSinceTransaction) => {
                     const address: string = Crypto.getAddressFromPublicKey(
                         transaction.senderPublicKey,
@@ -163,7 +163,7 @@ export class DatabaseAPI {
             );
 
             return new Map(
-                voters.map((voter) => [voter.address, voter.timeVoter])
+                voters.map((voter) => [voter.address, voter.duration])
             );
         } catch (e) {
             throw e;

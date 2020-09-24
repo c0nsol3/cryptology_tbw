@@ -6,7 +6,7 @@ import {
     Node,
     Receiver,
     SmallWalletBonus,
-    SmallWalletBonusConfig, VoterShareTime,
+    SmallWalletBonusConfig, DurationShare,
 } from "../interfaces";
 
 dotenv.config();
@@ -17,7 +17,7 @@ export class Config {
     public adminFees: boolean;
     public readonly multiTransferFee: BigNumber;
     public readonly voterShare: BigNumber;
-    public readonly voterShareSince: VoterShareTime[] = [];
+    public readonly voterShareSince: DurationShare[] = [];
     public readonly voterFeeShare: BigNumber;
     public readonly voterBusinessShare: BigNumber;
     public readonly businessShareMultiTransactionIncome: boolean;
@@ -95,6 +95,11 @@ export class Config {
             this.adminFees = true;
         }
 
+        this.voterShareSince = process.env.PAYOUT_VOTER_SINCE
+            ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
+            : []
+
+        console.log(JSON.stringify(this.voterShareSince))
         /*
         const voterShareSince = process.env.PAYOUT_VOTER_SINCE
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
@@ -102,7 +107,7 @@ export class Config {
 
         voterShareSince.forEach(( percentage: number, timeAsVoter: string) => {
             this.voterShareSince.push({
-                timeAsVoter: new BigNumber(timeAsVoter),
+                duration: new BigNumber(timeAsVoter),
                 percentage: new BigNumber(percentage)
             });
         });

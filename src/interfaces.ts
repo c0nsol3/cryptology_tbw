@@ -66,13 +66,13 @@ export interface Voter {
     username?: string;
 }
 
-export interface VotersSince {
+export interface VoterDuration {
     address: string;
-    timeVoter: BigNumber;
+    duration: BigNumber;
 }
 
-export interface VoterShareTime {
-    timeAsVoter: BigNumber;
+export interface DurationShare {
+    duration: BigNumber;
     percentage: BigNumber;
 }
 

@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { ARKTOSHI, SEPARATOR } from "../constants";
-import { Payouts, VoterShareTime } from "../interfaces";
+import { Payouts, DurationShare } from "../interfaces";
 import { Config, logger } from "../services";
 
 export class ProposalEngine {
@@ -347,7 +347,7 @@ export class ProposalEngine {
         }
 
         // check if there is a time limited share
-        this.config.voterShareSince.forEach((timeShare: VoterShareTime) => {
+        this.config.voterShareSince.forEach((timeShare: DurationShare) => {
             if(timeShare.timeAsVoter.lt(voterSeconds)) {
                 logger.info(`Voter ${address} has a time ${voterSeconds} | ${timeShare.timeAsVoter} related share of ${timeShare.percentage}`);
                 //return timeShare.percentage;
