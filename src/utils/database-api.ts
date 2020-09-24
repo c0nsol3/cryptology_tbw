@@ -102,7 +102,7 @@ export class DatabaseAPI {
         await this.psql.close();
 
         if (result.rows.length === 0) {
-            logger.info("No Delegate payouts retrieved.");
+            logger.info("No delegate payouts retrieved.");
             return [];
         }
         const delegatePayoutTransactions: DelegateTransaction[] = [];
@@ -122,7 +122,7 @@ export class DatabaseAPI {
         }
 
         logger.info(
-            `${delegatePayoutTransactions.length} Delegate Payout Transactions retrieved.`
+            `${delegatePayoutTransactions.length} Delegate payout transactions retrieved.`
         );
 
         return delegatePayoutTransactions;
