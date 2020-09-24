@@ -96,12 +96,12 @@ export class TrueBlockWeight {
                 process.exit(1);
             } else {
                 logger.info(
-                    `(Balance for delegate wallet: ${delegateBalance
+                    `Balance for delegate wallet: ${delegateBalance
                         .div(ARKTOSHI)
-                        .toFixed(8)} = +${delegateBalance
+                        .toFixed(8)} (+${delegateBalance
                         .minus(transfers.totalAmount.plus(transfers.totalFees))
                         .div(ARKTOSHI)
-                        .toFixed(8)}`
+                        .toFixed(8)})`
                 );
             }
             if (transfers.businessTransactions.length > 0) {
@@ -133,9 +133,9 @@ export class TrueBlockWeight {
                     process.exit(1);
                 } else {
                     logger.info(
-                        `(Balance for business wallet: ${businessBalance
+                        `Balance for business wallet: ${businessBalance
                             .div(ARKTOSHI)
-                            .toFixed(8)} = +${businessBalance
+                            .toFixed(8)} (+${businessBalance
                             .minus(
                                 transfers.totalBusinessAmount.plus(
                                     transfers.totalBusinessFees
