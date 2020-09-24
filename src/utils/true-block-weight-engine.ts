@@ -215,7 +215,8 @@ export class TrueBlockWeightEngine {
                 voterShares.feesPayouts,
                 voterShares.businessPayouts,
                 voters.currentVoters,
-                currentBalances
+                currentBalances,
+                votersSince
             );
             proposal.timestamp = timestamp;
 

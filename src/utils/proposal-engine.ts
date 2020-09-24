@@ -29,6 +29,7 @@ export class ProposalEngine {
      * @param businessPayouts
      * @param currentVoters
      * @param currentBalances
+     * @param votersSince
      */
     public applyProposal(
         currentBlock: number,
@@ -38,7 +39,8 @@ export class ProposalEngine {
         feesPayouts: Map<string, BigNumber>,
         businessPayouts: Map<string, BigNumber>,
         currentVoters: string[],
-        currentBalances: Map<string, BigNumber>
+        currentBalances: Map<string, BigNumber>,
+        votersSince: Map<string, BigNumber>
     ): Payouts {
         let totalPayout: BigNumber = new BigNumber(0);
         let totalDelegateProfit: BigNumber = new BigNumber(0);
@@ -62,10 +64,15 @@ export class ProposalEngine {
                     latestPayouts
                 )
             ) {
+                let voterSeconds = votersSince.get(address);
+                if(!voterSeconds) {
+                    voterSeconds = new BigNumber(0);
+                }
                 // Percentages
                 const percentage: BigNumber = this.getSharePercentage(
                     address,
-                    smallWallets
+                    smallWallets,
+                    voterSeconds
                 );
 
                 let voterLicenseFee: BigNumber = new BigNumber(
@@ -308,10 +315,12 @@ export class ProposalEngine {
      *
      * @param address
      * @param smallWallets
+     * @param voterSeconds
      */
     public getSharePercentage(
         address: string,
-        smallWallets: Map<string, boolean>
+        smallWallets: Map<string, boolean>,
+        voterSeconds: BigNumber
     ): BigNumber {
         if (this.config.customShares.hasOwnProperty(address)) {
             let customShare: BigNumber = new BigNumber(
@@ -335,6 +344,15 @@ export class ProposalEngine {
         // check if maximum wallet balance for this voter is <= small wallet limit and then return small wallet share
         if (smallWallets.get(address) === true) {
             return this.config.smallWalletBonus.percentage;
+        }
+
+        // check if there is a timelimited share
+        for( const seconds in this.config.voterShareSince) {
+            if(voterSeconds.lte(seconds)) {
+                //todo
+                logger.info(`Voter ${address} has a timerelates share of ${this.config.voterShareSince[seconds]}`);
+                return new BigNumber(this.config.voterShareSince[seconds]);
+            }
         }
         return this.config.voterShare;
     }
