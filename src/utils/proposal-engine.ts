@@ -178,7 +178,7 @@ export class ProposalEngine {
         if (this.config.adminFees && totalDelegateProfit.lt(totalFees)) {
             this.config.adminFees = false;
             logger.warn(
-                "Admin share not large enough to cover fees: Fair Fees will be applied."
+                "Admin share not large enough to cover fees: fair fees will be applied."
             );
         }
 
@@ -188,7 +188,7 @@ export class ProposalEngine {
                     .div(ARKTOSHI)
                     .toFixed(
                         8
-                    )} Transfer Fees will be deducted from Admin share (${totalDelegateProfit
+                    )} Transfer Fees will be deducted from admin share (${totalDelegateProfit
                     .div(ARKTOSHI)
                     .toFixed(8)}).`
             );

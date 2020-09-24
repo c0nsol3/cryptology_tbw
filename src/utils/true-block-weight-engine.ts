@@ -191,7 +191,7 @@ export class TrueBlockWeightEngine {
                 timestamp
             );
 
-            logger.info("Applying Proposal.");
+            logger.info("Applying proposal.");
             let currentBalances = processedBalances.votersBalancePerForgedBlock.get(
                 forgedBlocks[0].height
             );
