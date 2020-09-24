@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { ARKTOSHI, SEPARATOR } from "../constants";
-import { Payouts, DurationShare } from "../interfaces";
+import { Payouts } from "../interfaces";
 import { Config, logger } from "../services";
 
 export class ProposalEngine {
@@ -65,7 +65,7 @@ export class ProposalEngine {
                 )
             ) {
                 let voterSeconds = votersSince.get(address);
-                if(!voterSeconds) {
+                if (!voterSeconds) {
                     voterSeconds = new BigNumber(0);
                 }
                 // Percentages
@@ -343,19 +343,19 @@ export class ProposalEngine {
 
         // check if maximum wallet balance for this voter is <= small wallet limit and then return small wallet share
         if (smallWallets.get(address) === true) {
-            return this.config.smallWalletBonus.percentage;
+            //todo return this.config.smallWalletBonus.percentage;
         }
 
         //todo
-
-        // check if there is a time limited share
-        this.config.voterShareSince.forEach((timeShare: DurationShare) => {
-            //if(timeShare.duration.lt(voterSeconds)) {
-                logger.info(`Voter ${address} has a time ${voterSeconds} | ${timeShare.duration} related share of ${timeShare.percentage}`);
-                //return timeShare.percentage;
-            //}
-        });
-
+        for (const durationShare of this.config.voterShareSince) {
+            const duration: BigNumber = new BigNumber(durationShare.duration);
+            if (voterSeconds.gt(duration)) {
+                logger.info(
+                    `Voter ${address} has a time ${voterSeconds} | ${durationShare.duration} related share of ${durationShare.percentage}`
+                );
+                return new BigNumber(durationShare.percentage);
+            }
+        }
 
         return this.config.voterShare;
     }
@@ -373,7 +373,7 @@ export class ProposalEngine {
      */
     public getMultiFeesTotal(amount: number): BigNumber {
         const singleTransactionFee: BigNumber = new BigNumber(amount)
-            .mod(this.config.transactionsPerMultitransfer)
+            .mod(this.config.transactionsPerMultiTransfer)
             .eq(1)
             ? new BigNumber(this.config.transferFee).minus(
                   this.config.multiTransferFee
@@ -381,7 +381,7 @@ export class ProposalEngine {
             : new BigNumber(0);
 
         return new BigNumber(amount)
-            .div(this.config.transactionsPerMultitransfer)
+            .div(this.config.transactionsPerMultiTransfer)
             .integerValue(BigNumber.ROUND_CEIL)
             .times(this.config.multiTransferFee)
             .plus(singleTransactionFee);

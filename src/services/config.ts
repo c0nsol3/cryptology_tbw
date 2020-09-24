@@ -53,7 +53,7 @@ export class Config {
     public readonly businessSeed: string;
     public readonly businessSecondPassphrase: string;
     public transactionsPerRequest: number;
-    public transactionsPerMultitransfer: number;
+    public transactionsPerMultiTransfer: number;
 
     constructor() {
         this.noSignature = process.env.NO_VENDORFIELD
@@ -102,21 +102,6 @@ export class Config {
         this.voterShareSince.sort((a: DurationShare, b: DurationShare) => {
             return b.duration - a.duration;
         })
-        console.log(JSON.stringify(this.voterShareSince))
-        /*
-        const voterShareSince = process.env.PAYOUT_VOTER_SINCE
-            ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
-            : []
-
-        voterShareSince.forEach(( percentage: number, timeAsVoter: string) => {
-            this.voterShareSince.push({
-                duration: new BigNumber(timeAsVoter),
-                percentage: new BigNumber(percentage)
-            });
-        });
-
-
-         */
 
         this.voterFeeShare = process.env.PAYOUT_FEES
             ? new BigNumber(process.env.PAYOUT_FEES)
@@ -262,7 +247,7 @@ export class Config {
             ? parseInt(process.env.MAX_TRANSACTIONS_PER_REQUEST, 10)
             : 40;
 
-        this.transactionsPerMultitransfer = process.env.MAX_TRANSFERS_PER_MULTI
+        this.transactionsPerMultiTransfer = process.env.MAX_TRANSFERS_PER_MULTI
             ? parseInt(process.env.MAX_TRANSFERS_PER_MULTI, 10)
             : 64;
     }

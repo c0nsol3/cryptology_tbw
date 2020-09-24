@@ -51,11 +51,11 @@ export class TransactionEngine {
             for (
                 let i = 0;
                 i < receivers.length;
-                i += this.config.transactionsPerMultitransfer
+                i += this.config.transactionsPerMultiTransfer
             ) {
                 const chunk: Receiver[] = receivers.slice(
                     i,
-                    i + this.config.transactionsPerMultitransfer
+                    i + this.config.transactionsPerMultiTransfer
                 );
 
                 if (chunk.length === 1) {
@@ -192,8 +192,8 @@ export class TransactionEngine {
         Managers.configManager.setHeight(height);
 
         const milestone = Managers.configManager.getMilestone(height);
-        this.config.transactionsPerMultitransfer = Math.min(
-            this.config.transactionsPerMultitransfer,
+        this.config.transactionsPerMultiTransfer = Math.min(
+            this.config.transactionsPerMultiTransfer,
             milestone.multiPaymentLimit
         );
 
