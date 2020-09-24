@@ -96,6 +96,16 @@ export class Config {
             this.adminFees = true;
         }
 
+        if (process.env.SMALL_WALLET_BONUS) {
+            this.smallWalletBonus = this.processSmallWalletBonus(
+                JSON.parse(process.env.SMALL_WALLET_BONUS)
+            );
+        }
+
+        this.customShares = process.env.CUSTOM_PAYOUT_LIST
+            ? JSON.parse(process.env.CUSTOM_PAYOUT_LIST)
+            : {};
+
         this.voterShareSince = process.env.PAYOUT_VOTER_SINCE
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
             : []
@@ -111,6 +121,10 @@ export class Config {
         this.smallWalletShareSince.sort((a: DurationShare, b: DurationShare) => {
             return b.duration - a.duration;
         });
+
+        if(this.smallWalletShareSince.length && !this.smallWalletBonus.walletLimit) {
+            throw new TypeError("You need to set the wallet limit in SMALL_WALLET_BONUS.");
+        }
 
         this.voterFeeShare = process.env.PAYOUT_FEES
             ? new BigNumber(process.env.PAYOUT_FEES)
@@ -189,16 +203,6 @@ export class Config {
         this.blacklistedVoters = process.env.BLOCKLIST
             ? process.env.BLOCKLIST.split(",")
             : [];
-
-        if (process.env.SMALL_WALLET_BONUS) {
-            this.smallWalletBonus = this.processSmallWalletBonus(
-                JSON.parse(process.env.SMALL_WALLET_BONUS)
-            );
-        }
-
-        this.customShares = process.env.CUSTOM_PAYOUT_LIST
-            ? JSON.parse(process.env.CUSTOM_PAYOUT_LIST)
-            : {};
 
         this.walletRedirections = process.env.CUSTOM_REDIRECTIONS
             ? JSON.parse(process.env.CUSTOM_REDIRECTIONS)
