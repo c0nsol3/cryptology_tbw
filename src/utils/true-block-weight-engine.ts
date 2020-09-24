@@ -191,6 +191,7 @@ export class TrueBlockWeightEngine {
                 timestamp
             );
             // todo
+            /*
             votersSince.forEach((since: BigNumber, address: string) => {
                 logger.info(`${address} has been a voter for ${since} seconds`);
             });
@@ -199,6 +200,8 @@ export class TrueBlockWeightEngine {
             }
 
             logger.info(JSON.stringify(this.config.voterShareSince ))
+
+             */
 
 
 
