@@ -343,7 +343,17 @@ export class ProposalEngine {
 
         // check if maximum wallet balance for this voter is <= small wallet limit and then return small wallet share
         if (smallWallets.get(address) === true) {
-            //todo return this.config.smallWalletBonus.percentage;
+            for (const durationShare of this.config.smallWalletShareSince) {
+                const duration: BigNumber = new BigNumber(durationShare.duration);
+                if (voterSeconds.gt(duration)) {
+                    //todo
+                    logger.info(
+                        `Small Wallet ${address} has a time ${voterSeconds} | ${durationShare.duration} related share of ${durationShare.percentage}`
+                    );
+                    return new BigNumber(durationShare.percentage);
+                }
+            }
+            return this.config.smallWalletBonus.percentage;
         }
 
         //todo

@@ -18,6 +18,7 @@ export class Config {
     public readonly multiTransferFee: BigNumber;
     public readonly voterShare: BigNumber;
     public readonly voterShareSince: DurationShare[] = [];
+    public readonly smallWalletShareSince: DurationShare[] = [];
     public readonly voterFeeShare: BigNumber;
     public readonly voterBusinessShare: BigNumber;
     public readonly businessShareMultiTransactionIncome: boolean;
@@ -101,7 +102,15 @@ export class Config {
 
         this.voterShareSince.sort((a: DurationShare, b: DurationShare) => {
             return b.duration - a.duration;
-        })
+        });
+
+        this.smallWalletShareSince = process.env.PAYOUT_SMALL_WALLET_SICE
+            ? JSON.parse(process.env.PAYOUT_SMALL_WALLET_SICE)
+            : []
+
+        this.smallWalletShareSince.sort((a: DurationShare, b: DurationShare) => {
+            return b.duration - a.duration;
+        });
 
         this.voterFeeShare = process.env.PAYOUT_FEES
             ? new BigNumber(process.env.PAYOUT_FEES)
