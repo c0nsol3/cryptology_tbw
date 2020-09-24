@@ -95,6 +95,7 @@ export class Config {
             this.adminFees = true;
         }
 
+        /*
         const voterShareSince = process.env.PAYOUT_VOTER_SINCE
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
             : []
@@ -106,6 +107,8 @@ export class Config {
             });
         });
 
+
+         */
 
         this.voterFeeShare = process.env.PAYOUT_FEES
             ? new BigNumber(process.env.PAYOUT_FEES)
