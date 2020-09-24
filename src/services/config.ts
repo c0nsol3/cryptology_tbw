@@ -17,7 +17,7 @@ export class Config {
     public adminFees: boolean;
     public readonly multiTransferFee: BigNumber;
     public readonly voterShare: BigNumber;
-    public readonly voterShareSince: { [key: number]: number };
+    public readonly voterShareSince: number[];
     public readonly voterFeeShare: BigNumber;
     public readonly voterBusinessShare: BigNumber;
     public readonly businessShareMultiTransactionIncome: boolean;
@@ -97,7 +97,11 @@ export class Config {
 
         this.voterShareSince = process.env.PAYOUT_VOTER_SINCE
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
-            : {}
+            : []
+
+        this.voterShareSince.sort( (a, b) => {
+            return a-b
+        })
 
         this.voterFeeShare = process.env.PAYOUT_FEES
             ? new BigNumber(process.env.PAYOUT_FEES)
