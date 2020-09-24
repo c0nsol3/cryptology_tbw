@@ -198,6 +198,9 @@ export class TrueBlockWeightEngine {
                 logger.info(`SECONDS: ${seconds} = ${this.config.voterShareSince[seconds]}`)
             }
 
+            logger.info(JSON.stringify(this.config.voterShareSince ))
+
+
 
             logger.info("Applying Proposal.");
             let currentBalances = processedBalances.votersBalancePerForgedBlock.get(
