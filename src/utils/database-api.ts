@@ -153,9 +153,7 @@ export class DatabaseAPI {
                     networkVersion
                 );
                 return {
-                    publicKey: new BigNumber(
-                        transaction.senderPublicKey
-                    ).integerValue(),
+                    publicKey: transaction.senderPublicKey,
                     address,
                     timeVoter: new BigNumber(timestamp).minus(
                         new BigNumber(transaction.timestamp)
