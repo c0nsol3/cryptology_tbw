@@ -155,7 +155,7 @@ export class DatabaseAPI {
                     );
                     return {
                         address,
-                        timeVoter: new BigNumber(timestamp).minus(
+                        duration: new BigNumber(timestamp).minus(
                             new BigNumber(transaction.timestamp)
                         ),
                     };
