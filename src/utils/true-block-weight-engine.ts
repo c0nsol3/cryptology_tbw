@@ -191,7 +191,10 @@ export class TrueBlockWeightEngine {
                 timestamp
             );
             // todo
-            logger.info(JSON.stringify(votersSince));
+            votersSince.forEach((since: BigNumber, address: string) => {
+                logger.info(`${address} has been a voter for ${since} milliseconds`);
+            });
+
 
             logger.info("Applying Proposal.");
             let currentBalances = processedBalances.votersBalancePerForgedBlock.get(
