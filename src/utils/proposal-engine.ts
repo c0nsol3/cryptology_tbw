@@ -348,7 +348,7 @@ export class ProposalEngine {
 
         // check if there is a timelimited share
         for( const seconds in this.config.voterShareSince) {
-            if(voterSeconds.lte(seconds)) {
+            if(voterSeconds.gt(seconds)) {
                 //todo
                 logger.info(`Voter ${address} has a time ${voterSeconds} related share of ${this.config.voterShareSince[seconds]}`);
                 return new BigNumber(this.config.voterShareSince[seconds]);
