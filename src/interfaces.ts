@@ -71,6 +71,11 @@ export interface VotersSince {
     timeVoter: BigNumber;
 }
 
+export interface VoterShareTime {
+    timeAsVoter: BigNumber;
+    percentage: BigNumber;
+}
+
 export interface Voters {
     votersPerForgedBlock: Map<number, string[]>;
     voters: string[];

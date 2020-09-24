@@ -1,6 +1,6 @@
 import BigNumber from "bignumber.js";
 import { ARKTOSHI, SEPARATOR } from "../constants";
-import { Payouts } from "../interfaces";
+import { Payouts, VoterShareTime } from "../interfaces";
 import { Config, logger } from "../services";
 
 export class ProposalEngine {
@@ -346,14 +346,13 @@ export class ProposalEngine {
             //return this.config.smallWalletBonus.percentage;
         }
 
-        // check if there is a timelimited share
-        for( const seconds in this.config.voterShareSince) {
-            if(voterSeconds.gt(new BigNumber(seconds))) {
-                //todo
-                logger.info(`Voter ${address} has a time ${voterSeconds} | ${new BigNumber(seconds)} related share of ${this.config.voterShareSince[seconds]}`);
-                return new BigNumber(this.config.voterShareSince[seconds]);
+        // check if there is a time limited share
+        this.config.voterShareSince.forEach((timeShare: VoterShareTime) => {
+            if(timeShare.timeAsVoter.lt(voterSeconds)) {
+                logger.info(`Voter ${address} has a time ${voterSeconds} | ${timeShare.timeAsVoter} related share of ${timeShare.percentage}`);
+                //return timeShare.percentage;
             }
-        }
+        });
         return this.config.voterShare;
     }
 
