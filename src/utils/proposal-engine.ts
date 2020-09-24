@@ -350,7 +350,7 @@ export class ProposalEngine {
         for( const seconds in this.config.voterShareSince) {
             if(voterSeconds.gt(new BigNumber(seconds))) {
                 //todo
-                logger.info(`Voter ${address} has a time ${voterSeconds} related share of ${this.config.voterShareSince[seconds]}`);
+                logger.info(`Voter ${address} has a time ${voterSeconds} | ${new BigNumber(seconds)} related share of ${this.config.voterShareSince[seconds]}`);
                 return new BigNumber(this.config.voterShareSince[seconds]);
             }
         }
