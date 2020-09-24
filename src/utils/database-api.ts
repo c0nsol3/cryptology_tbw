@@ -132,7 +132,7 @@ export class DatabaseAPI {
         delegatePublicKey: string,
         networkVersion: number,
         timestamp: BigNumber
-    ): Promise<VotersSince[]> {
+    ): Promise<Map<string, BigNumber>> {
         const getCurrentVotersQuery: string = getCurrentVotersSince(
             delegatePublicKey
         );
@@ -143,23 +143,24 @@ export class DatabaseAPI {
 
         if (result.rows.length === 0) {
             logger.warn(`There are no current voters.`);
-            return [];
+            return new Map();
         }
 
         try {
-            return result.rows.map((transaction: VoterSinceTransaction) => {
+            const voters: VotersSince[] = result.rows.map((transaction: VoterSinceTransaction) => {
                 const address: string = Crypto.getAddressFromPublicKey(
                     transaction.senderPublicKey,
                     networkVersion
                 );
                 return {
-                    publicKey: transaction.senderPublicKey,
                     address,
                     timeVoter: new BigNumber(timestamp).minus(
                         new BigNumber(transaction.timestamp)
                     ),
                 };
             });
+
+            return new Map(voters.map(voter => [voter.address, voter.timeVoter]));
         } catch (e) {
             throw e;
         }

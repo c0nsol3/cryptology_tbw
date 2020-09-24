@@ -68,7 +68,6 @@ export interface Voter {
 
 export interface VotersSince {
     address: string;
-    publicKey: string;
     timeVoter: BigNumber;
 }
 

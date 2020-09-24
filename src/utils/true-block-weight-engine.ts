@@ -18,7 +18,6 @@ import {
     VoterMutation,
     Voters,
     VotersPerForgedBlock,
-    VotersSince,
 } from "../interfaces";
 import { Config, logger, Network } from "../services";
 import { DatabaseAPI } from "./database-api";
@@ -183,7 +182,7 @@ export class TrueBlockWeightEngine {
                 processedBalances.votersBalancePerForgedBlock
             );
 
-            const votersSince: VotersSince[] = await this.databaseAPI.getCurrentVotersSince(
+            const votersSince: Map<string, BigNumber> = await this.databaseAPI.getCurrentVotersSince(
                 delegatePublicKey,
                 this.networkVersion,
                 timestamp
