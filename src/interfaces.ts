@@ -72,8 +72,8 @@ export interface VoterDuration {
 }
 
 export interface DurationShare {
-    duration: BigNumber;
-    percentage: BigNumber;
+    duration: number;
+    percentage: number;
 }
 
 export interface Voters {
