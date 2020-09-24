@@ -192,9 +192,7 @@ export class TrueBlockWeightEngine {
             );
             // todo
             votersSince.forEach((since: BigNumber, address: string) => {
-                const date = new Date(0);
-                date.setSeconds(since.toNumber());
-                logger.info(`${address} has been a voter for ${date.toISOString()}`);
+                logger.info(`${address} has been a voter for ${since} seconds`);
             });
 
 
