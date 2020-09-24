@@ -99,6 +99,9 @@ export class Config {
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
             : []
 
+        this.voterShareSince.sort((a: DurationShare, b: DurationShare) => {
+            return b.duration - a.duration;
+        })
         console.log(JSON.stringify(this.voterShareSince))
         /*
         const voterShareSince = process.env.PAYOUT_VOTER_SINCE
