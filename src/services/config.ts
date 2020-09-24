@@ -99,10 +99,6 @@ export class Config {
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
             : []
 
-        this.voterShareSince.sort( (a, b) => {
-            return a-b
-        })
-
         this.voterFeeShare = process.env.PAYOUT_FEES
             ? new BigNumber(process.env.PAYOUT_FEES)
             : this.voterShare;
