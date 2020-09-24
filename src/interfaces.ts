@@ -66,6 +66,12 @@ export interface Voter {
     username?: string;
 }
 
+export interface VotersSince {
+    address: string;
+    publicKey: string;
+    timeVoter: BigNumber;
+}
+
 export interface Voters {
     votersPerForgedBlock: Map<number, string[]>;
     voters: string[];
@@ -113,6 +119,12 @@ export interface Block {
 
 export interface VoteTransaction {
     height: number;
+    asset: any;
+    senderPublicKey: string;
+}
+
+export interface VoterSinceTransaction {
+    timestamp: number;
     asset: any;
     senderPublicKey: string;
 }

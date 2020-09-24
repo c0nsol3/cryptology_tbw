@@ -10,17 +10,19 @@ import {
     Voter,
     VoterBlock,
     VoterMutation,
+    VoterSinceTransaction,
+    VotersSince,
     VoteTransaction,
 } from "../interfaces";
 import { logger, Postgres } from "../services";
 import { Crypto } from "./crypto";
 import {
+    getCurrentVotersSince,
     getDelegateTransactions,
     getForgedBlocks,
     getTransactions,
     getVoterSinceHeight,
     getVotingDelegates,
-    getCurrentVotersSince,
 } from "./queries";
 
 export class DatabaseAPI {
@@ -126,7 +128,11 @@ export class DatabaseAPI {
         return delegatePayoutTransactions;
     }
 
-    public async getCurrentVoters(delegatePublicKey: string): Promise<Voter[]> {
+    public async getCurrentVotersSince(
+        delegatePublicKey: string,
+        networkVersion: number,
+        timestamp: BigNumber
+    ): Promise<VotersSince[]> {
         const getCurrentVotersQuery: string = getCurrentVotersSince(
             delegatePublicKey
         );
@@ -140,13 +146,29 @@ export class DatabaseAPI {
             return [];
         }
 
-        //todo
-        const voters: Voter[] = [];
-        return voters;
+        try {
+            return result.rows.map((transaction: VoterSinceTransaction) => {
+                const address: string = Crypto.getAddressFromPublicKey(
+                    transaction.senderPublicKey,
+                    networkVersion
+                );
+                return {
+                    publicKey: new BigNumber(
+                        transaction.senderPublicKey
+                    ).integerValue(),
+                    address,
+                    timeVoter: new BigNumber(timestamp).minus(
+                        new BigNumber(transaction.timestamp)
+                    ),
+                };
+            });
+        } catch (e) {
+            throw e;
+        }
     }
 
     /**
-     * Get all the votes/unvotes for this delegate that are within range.
+     * Get all the votes/un-votes for this delegate that are within range.
      * @param delegatePublicKey
      * @param startBlockHeight
      * @param networkVersion
@@ -202,7 +224,7 @@ export class DatabaseAPI {
                         voterMutations[vote];
                     const voterAction = votingTransaction.vote.startsWith("+")
                         ? "voted"
-                        : "unvoted";
+                        : "un-voted";
                     logger.info(
                         `Vote: ${votingTransaction.address} ${voterAction} at blockHeight ${votingTransaction.height}`
                     );

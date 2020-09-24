@@ -18,6 +18,7 @@ import {
     VoterMutation,
     Voters,
     VotersPerForgedBlock,
+    VotersSince,
 } from "../interfaces";
 import { Config, logger, Network } from "../services";
 import { DatabaseAPI } from "./database-api";
@@ -181,6 +182,14 @@ export class TrueBlockWeightEngine {
                 previousPayouts.latestPayoutsTimeStamp,
                 processedBalances.votersBalancePerForgedBlock
             );
+
+            const votersSince: VotersSince[] = await this.databaseAPI.getCurrentVotersSince(
+                delegatePublicKey,
+                this.networkVersion,
+                timestamp
+            );
+            // todo
+            logger.info(JSON.stringify(votersSince));
 
             logger.info("Applying Proposal.");
             let currentBalances = processedBalances.votersBalancePerForgedBlock.get(
