@@ -348,23 +348,15 @@ export class ProposalEngine {
                     durationShare.duration
                 );
                 if (voterSeconds.gt(duration)) {
-                    // todo
-                    logger.info(
-                        `Small Wallet ${address} has a time ${voterSeconds} | ${durationShare.duration} related share of ${durationShare.percentage}`
-                    );
                     return new BigNumber(durationShare.percentage);
                 }
             }
             return this.config.smallWalletBonus.percentage;
         }
 
-        // todo
         for (const durationShare of this.config.voterShareSince) {
             const duration: BigNumber = new BigNumber(durationShare.duration);
             if (voterSeconds.gt(duration)) {
-                logger.info(
-                    `Voter ${address} has a time ${voterSeconds} | ${durationShare.duration} related share of ${durationShare.percentage}`
-                );
                 return new BigNumber(durationShare.percentage);
             }
         }
