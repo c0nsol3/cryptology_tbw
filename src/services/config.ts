@@ -6,7 +6,8 @@ import {
     Node,
     Receiver,
     SmallWalletBonus,
-    SmallWalletBonusConfig, DurationShare,
+    SmallWalletBonusConfig,
+    DurationShare,
 } from "../interfaces";
 
 dotenv.config();
@@ -108,7 +109,7 @@ export class Config {
 
         this.voterShareSince = process.env.PAYOUT_VOTER_SINCE
             ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
-            : []
+            : [];
 
         this.voterShareSince.sort((a: DurationShare, b: DurationShare) => {
             return b.duration - a.duration;
@@ -116,14 +117,21 @@ export class Config {
 
         this.smallWalletShareSince = process.env.PAYOUT_SMALL_WALLET_SICE
             ? JSON.parse(process.env.PAYOUT_SMALL_WALLET_SICE)
-            : []
+            : [];
 
-        this.smallWalletShareSince.sort((a: DurationShare, b: DurationShare) => {
-            return b.duration - a.duration;
-        });
+        this.smallWalletShareSince.sort(
+            (a: DurationShare, b: DurationShare) => {
+                return b.duration - a.duration;
+            }
+        );
 
-        if(this.smallWalletShareSince.length && !this.smallWalletBonus.walletLimit) {
-            throw new TypeError("You need to set the wallet limit in SMALL_WALLET_BONUS.");
+        if (
+            this.smallWalletShareSince.length &&
+            !this.smallWalletBonus.walletLimit
+        ) {
+            throw new TypeError(
+                "You need to set the wallet limit in SMALL_WALLET_BONUS."
+            );
         }
 
         this.voterFeeShare = process.env.PAYOUT_FEES
