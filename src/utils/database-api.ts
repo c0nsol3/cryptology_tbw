@@ -147,20 +147,24 @@ export class DatabaseAPI {
         }
 
         try {
-            const voters: VotersSince[] = result.rows.map((transaction: VoterSinceTransaction) => {
-                const address: string = Crypto.getAddressFromPublicKey(
-                    transaction.senderPublicKey,
-                    networkVersion
-                );
-                return {
-                    address,
-                    timeVoter: new BigNumber(timestamp).minus(
-                        new BigNumber(transaction.timestamp)
-                    ),
-                };
-            });
+            const voters: VotersSince[] = result.rows.map(
+                (transaction: VoterSinceTransaction) => {
+                    const address: string = Crypto.getAddressFromPublicKey(
+                        transaction.senderPublicKey,
+                        networkVersion
+                    );
+                    return {
+                        address,
+                        timeVoter: new BigNumber(timestamp).minus(
+                            new BigNumber(transaction.timestamp)
+                        ),
+                    };
+                }
+            );
 
-            return new Map(voters.map(voter => [voter.address, voter.timeVoter]));
+            return new Map(
+                voters.map((voter) => [voter.address, voter.timeVoter])
+            );
         } catch (e) {
             throw e;
         }

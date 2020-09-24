@@ -182,7 +182,10 @@ export class TrueBlockWeightEngine {
                 processedBalances.votersBalancePerForgedBlock
             );
 
-            const votersSince: Map<string, BigNumber> = await this.databaseAPI.getCurrentVotersSince(
+            const votersSince: Map<
+                string,
+                BigNumber
+            > = await this.databaseAPI.getCurrentVotersSince(
                 delegatePublicKey,
                 this.networkVersion,
                 timestamp
