@@ -348,8 +348,8 @@ export class ProposalEngine {
 
         // check if there is a time limited share
         this.config.voterShareSince.forEach((timeShare: DurationShare) => {
-            if(timeShare.timeAsVoter.lt(voterSeconds)) {
-                logger.info(`Voter ${address} has a time ${voterSeconds} | ${timeShare.timeAsVoter} related share of ${timeShare.percentage}`);
+            if(timeShare.duration.lt(voterSeconds)) {
+                logger.info(`Voter ${address} has a time ${voterSeconds} | ${timeShare.duration} related share of ${timeShare.percentage}`);
                 //return timeShare.percentage;
             }
         });
