@@ -194,6 +194,9 @@ export class TrueBlockWeightEngine {
             votersSince.forEach((since: BigNumber, address: string) => {
                 logger.info(`${address} has been a voter for ${since} seconds`);
             });
+            for( const seconds in this.config.voterShareSince) {
+                logger.info(`SECONDS: ${seconds} = ${this.config.voterShareSince[seconds]}`)
+            }
 
 
             logger.info("Applying Proposal.");
