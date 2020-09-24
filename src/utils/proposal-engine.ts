@@ -343,7 +343,7 @@ export class ProposalEngine {
 
         // check if maximum wallet balance for this voter is <= small wallet limit and then return small wallet share
         if (smallWallets.get(address) === true) {
-            return this.config.smallWalletBonus.percentage;
+            //return this.config.smallWalletBonus.percentage;
         }
 
         // check if there is a timelimited share
