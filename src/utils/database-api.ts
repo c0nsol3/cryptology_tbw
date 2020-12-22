@@ -201,12 +201,20 @@ export class DatabaseAPI {
                         transaction.senderPublicKey,
                         networkVersion
                     );
+
+                    const vote: string =
+                        transaction.asset.votes[0].substring(1) ===
+                        delegatePublicKey &&
+                        transaction.asset.votes[0].substring(1) !==
+                        transaction.asset.votes[1].substring(1)
+                            ? transaction.asset.votes[0]
+                            : transaction.asset.votes[1];
                     return {
                         height: new BigNumber(
                             transaction.height
                         ).integerValue(),
                         address,
-                        vote: transaction.asset.votes[0],
+                        vote,
                     };
                     /*
                 })
