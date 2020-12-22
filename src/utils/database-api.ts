@@ -205,7 +205,10 @@ export class DatabaseAPI {
                         networkVersion
                     );
 
-                    const vote: string = this.selectVote(transaction.asset.votes);
+                    const vote: string = DatabaseAPI.selectVote(
+                        transaction.asset.votes,
+                        delegatePublicKey
+                    );
                     return {
                         height: new BigNumber(
                             transaction.height
@@ -223,27 +226,38 @@ export class DatabaseAPI {
                         voterMutations[vote];
                     const voterAction = votingTransaction.vote.startsWith("+")
                         ? "voted"
-                        : "un-voted";
+                        : votingTransaction.vote.startsWith("-")
+                        ? "un-voted"
+                        : "un-voted and voted";
                     logger.info(
                         `Vote: ${votingTransaction.address} ${voterAction} at blockHeight ${votingTransaction.height}`
                     );
                 }
             }
-            return voterMutations;
+            return voterMutations.filter(
+                votingTransaction => {
+                    return votingTransaction.vote !== "";
+                }
+            );
         } catch (e) {
             logger.error("0 Voter mutations retrieved.");
             return [];
         }
     }
 
-    private selectVote(votes: string[]): string {
-        //transaction.asset.votes[0].substring(1) ===
-        //delegatePublicKey &&
-        //(transaction.asset.votes.length === 1 ||
-        //    transaction.asset.votes[0].substring(1) !==
-        //    transaction.asset.votes[1].substring(1))
-        //    ? transaction.asset.votes[0]
-        //    : transaction.asset.votes[1];
+    private static selectVote(
+        votes: string[],
+        delegatePublicKey: string
+    ): string {
+        if (votes.length === 2) {
+            if (votes[0].substr(1) === votes[1].substr(1)) {
+                return "";
+            }
+            if (votes[1].substr(1) === delegatePublicKey) {
+                return votes[1];
+            }
+        }
+
         return votes[0];
     }
 
