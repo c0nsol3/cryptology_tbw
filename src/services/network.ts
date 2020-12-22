@@ -159,6 +159,19 @@ export class Network {
             return delegateNameAPIResults.data[0].username;
         }
 
+        // Core V3
+        if (
+            delegateNameAPIResults &&
+            delegateNameAPIResults.hasOwnProperty("data") &&
+            delegateNameAPIResults.data.length > 0 &&
+            delegateNameAPIResults.data[0].hasOwnProperty("attributes") &&
+            delegateNameAPIResults.data[0].attributes.hasOwnProperty("delegate") &&
+            delegateNameAPIResults.data[0].attributes.delegate.hasOwnProperty("username") &&
+            delegateNameAPIResults.data[0].attributes.delegate.username
+        ) {
+            return delegateNameAPIResults.data[0].attributes.delegate.username;
+        }
+
         throw new Error(
             "Could not retrieve delegate data: does the configured seed belong to a delegate wallet?"
         );
