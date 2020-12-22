@@ -193,7 +193,7 @@ export class DatabaseAPI {
         logger.error(JSON.stringify(result.rows));
 
         if (result.rows.length === 0) {
-            logger.warn("0 Voter mutations retrieved.");
+            logger.info("No Voter mutations retrieved from database.");
             return [];
         }
 
@@ -205,13 +205,7 @@ export class DatabaseAPI {
                         networkVersion
                     );
 
-                    const vote: string =
-                        transaction.asset.votes[0].substring(1) ===
-                        delegatePublicKey &&
-                        transaction.asset.votes[0].substring(1) !==
-                        transaction.asset.votes[1].substring(1)
-                            ? transaction.asset.votes[0]
-                            : transaction.asset.votes[1];
+                    const vote: string = this.selectVote(transaction.asset.votes);
                     return {
                         height: new BigNumber(
                             transaction.height
@@ -240,6 +234,17 @@ export class DatabaseAPI {
             logger.error("0 Voter mutations retrieved.");
             return [];
         }
+    }
+
+    private selectVote(votes: string[]): string {
+        //transaction.asset.votes[0].substring(1) ===
+        //delegatePublicKey &&
+        //(transaction.asset.votes.length === 1 ||
+        //    transaction.asset.votes[0].substring(1) !==
+        //    transaction.asset.votes[1].substring(1))
+        //    ? transaction.asset.votes[0]
+        //    : transaction.asset.votes[1];
+        return votes[0];
     }
 
     /**
