@@ -241,7 +241,7 @@ export class Config {
 
         this.vendorField = process.env.VENDORFIELD_MESSAGE
             ? process.env.VENDORFIELD_MESSAGE
-            : "`Voter Share.";
+            : "Voter Share.";
         this.vendorFieldAdmin = process.env.VENDORFIELD_ADMINISTRATIVE_MESSAGE
             ? process.env.VENDORFIELD_ADMINISTRATIVE_MESSAGE
             : "Delegate Fee.";
