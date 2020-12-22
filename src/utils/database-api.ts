@@ -190,7 +190,7 @@ export class DatabaseAPI {
         await this.psql.close();
 
         //todo
-        console.log(getVoterSinceHeightQuery);
+        logger.error(JSON.stringify(result.rows));
 
         if (result.rows.length === 0) {
             logger.warn("0 Voter mutations retrieved.");
