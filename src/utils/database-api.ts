@@ -231,7 +231,7 @@ export class DatabaseAPI {
                 }
             );
 
-            logger.info(`${voterMutations.length} Voter mutations retrieved.`);
+            logger.info(`${voterMutations.length} Voter mutations processed.`);
             for (const vote in voterMutations) {
                 if (voterMutations[vote]) {
                     const votingTransaction: VoterMutation =
