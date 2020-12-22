@@ -219,15 +219,6 @@ export class DatabaseAPI {
                         address,
                         vote,
                     };
-                    /*
-                })
-                .filter((transaction: VoterMutation) => {
-                    return (
-                        transaction.vote &&
-                        transaction.vote.includes(`${delegatePublicKey}`)
-                    );
-
-                     */
                 }
             );
 
@@ -246,7 +237,7 @@ export class DatabaseAPI {
             }
             return voterMutations;
         } catch (e) {
-            logger.info("0 Voter mutations retrieved.");
+            logger.error("0 Voter mutations retrieved.");
             return [];
         }
     }
