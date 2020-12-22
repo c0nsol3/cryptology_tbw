@@ -234,11 +234,12 @@ export class DatabaseAPI {
                     );
                 }
             }
-            return voterMutations.filter(
-                votingTransaction => {
-                    return votingTransaction.vote !== "";
-                }
-            );
+            return voterMutations.filter((votingTransaction) => {
+                return (
+                    votingTransaction.vote.startsWith("+") ||
+                    votingTransaction.vote.startsWith("-")
+                );
+            });
         } catch (e) {
             logger.error("0 Voter mutations retrieved.");
             return [];
