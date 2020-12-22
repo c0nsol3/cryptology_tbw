@@ -189,9 +189,6 @@ export class DatabaseAPI {
         const result: Result = await this.psql.query(getVoterSinceHeightQuery);
         await this.psql.close();
 
-        //todo
-        logger.error(JSON.stringify(result.rows));
-
         if (result.rows.length === 0) {
             logger.info("No Voter mutations retrieved from database.");
             return [];
