@@ -396,7 +396,7 @@ export class Network {
                     `Sending ${transactions.length} transactions to ${node}.`
                 );
                 const response = await axios.post(
-                    `${node}/api/v2/transactions`,
+                    `${node}/api/transactions`,
                     {
                         transactions,
                     },
