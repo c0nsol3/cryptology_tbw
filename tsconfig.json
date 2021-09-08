@@ -7,12 +7,15 @@
         "module": "commonjs",
         "moduleResolution": "node",
         "sourceMap": true,
-        "strict": false,
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
+        "strict": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
         "resolveJsonModule": true,
         "outDir": "dist",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "forceConsistentCasingInFileNames": true,
+        "noImplicitReturns": true,
+        "removeComments": true
     },
     "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"],
     "include": ["src/**/**.ts"]

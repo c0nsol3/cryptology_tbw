@@ -1,19 +1,28 @@
 import BigNumber from "bignumber.js";
 import dotenv from "dotenv";
 import { ARKTOSHI } from "../constants";
-import { Node, Receiver, SmallWalletBonus } from "../interfaces";
+import {
+    AdminShareConfig,
+    Node,
+    Receiver,
+    SmallWalletBonus,
+    SmallWalletBonusConfig,
+    DurationShare,
+} from "../interfaces";
 
 dotenv.config();
 
 export class Config {
-    public readonly delegate: string;
     public readonly transferFee: BigNumber;
     public readonly noSignature: boolean;
     public adminFees: boolean;
     public readonly multiTransferFee: BigNumber;
     public readonly voterShare: BigNumber;
+    public readonly voterShareSince: DurationShare[] = [];
+    public readonly smallWalletShareSince: DurationShare[] = [];
     public readonly voterFeeShare: BigNumber;
     public readonly voterBusinessShare: BigNumber;
+    public readonly businessShareMultiTransactionIncome: boolean;
     public readonly minimalPayoutValue: BigNumber;
     public readonly donationShare: BigNumber;
     public readonly minimalBalance: BigNumber;
@@ -27,9 +36,9 @@ export class Config {
         walletLimit: new BigNumber(0),
         percentage: new BigNumber(0),
     };
-    public readonly customShares: number[];
-    public readonly walletRedirections: string[];
-    public readonly customPayoutFrequencies: number[];
+    public readonly customShares: { [key: string]: number };
+    public readonly walletRedirections: { [key: string]: string };
+    public readonly customPayoutFrequencies: { [key: string]: number };
     public readonly databaseHost: string;
     public readonly databaseUser: string;
     public readonly databasePassword: string;
@@ -46,16 +55,9 @@ export class Config {
     public readonly businessSeed: string;
     public readonly businessSecondPassphrase: string;
     public transactionsPerRequest: number;
-    public transactionsPerMultitransfer: number;
+    public transactionsPerMultiTransfer: number;
 
     constructor() {
-        this.delegate = process.env.DELEGATE
-            ? process.env.DELEGATE.toLowerCase().trim()
-            : null;
-        if (this.delegate === null || this.delegate === "") {
-            throw new TypeError("Invalid DELEGATE configuration");
-        }
-
         this.noSignature = process.env.NO_VENDORFIELD
             ? parseInt(process.env.NO_VENDORFIELD, 10) > 0
             : false;
@@ -91,8 +93,45 @@ export class Config {
             );
         }
 
-        if(this.voterShare.eq(0)) {
+        if (this.voterShare.eq(0)) {
             this.adminFees = true;
+        }
+
+        if (process.env.SMALL_WALLET_BONUS) {
+            this.smallWalletBonus = this.processSmallWalletBonus(
+                JSON.parse(process.env.SMALL_WALLET_BONUS)
+            );
+        }
+
+        this.customShares = process.env.CUSTOM_PAYOUT_LIST
+            ? JSON.parse(process.env.CUSTOM_PAYOUT_LIST)
+            : {};
+
+        this.voterShareSince = process.env.PAYOUT_VOTER_SINCE
+            ? JSON.parse(process.env.PAYOUT_VOTER_SINCE)
+            : [];
+
+        this.voterShareSince.sort((a: DurationShare, b: DurationShare) => {
+            return b.duration - a.duration;
+        });
+
+        this.smallWalletShareSince = process.env.PAYOUT_SMALL_WALLET_SICE
+            ? JSON.parse(process.env.PAYOUT_SMALL_WALLET_SICE)
+            : [];
+
+        this.smallWalletShareSince.sort(
+            (a: DurationShare, b: DurationShare) => {
+                return b.duration - a.duration;
+            }
+        );
+
+        if (
+            this.smallWalletShareSince.length &&
+            !this.smallWalletBonus.walletLimit
+        ) {
+            throw new TypeError(
+                "You need to set the wallet limit in SMALL_WALLET_BONUS."
+            );
         }
 
         this.voterFeeShare = process.env.PAYOUT_FEES
@@ -116,6 +155,11 @@ export class Config {
         ) {
             throw new TypeError("Invalid PAYOUT_BUSINESS configuration");
         }
+
+        this.businessShareMultiTransactionIncome = process.env
+            .BUSINESS_SHARE_MULTITX_INCOME
+            ? parseInt(process.env.BUSINESS_SHARE_MULTITX_INCOME, 10) > 0
+            : false;
 
         this.minimalPayoutValue = process.env.MIN_PAYOUT_VALUE
             ? new BigNumber(process.env.MIN_PAYOUT_VALUE).times(ARKTOSHI)
@@ -142,7 +186,7 @@ export class Config {
 
         this.endAtBlockHeight = process.env.END_BLOCK_HEIGHT
             ? parseInt(process.env.END_BLOCK_HEIGHT, 10)
-            : null;
+            : Number.NaN;
         if (
             Number.isInteger(this.endAtBlockHeight) &&
             this.endAtBlockHeight <= this.startFromBlockHeight
@@ -167,16 +211,6 @@ export class Config {
         this.blacklistedVoters = process.env.BLOCKLIST
             ? process.env.BLOCKLIST.split(",")
             : [];
-
-        if (process.env.SMALL_WALLET_BONUS) {
-            this.smallWalletBonus = this.processSmallWalletBonus(
-                JSON.parse(process.env.SMALL_WALLET_BONUS)
-            );
-        }
-
-        this.customShares = process.env.CUSTOM_PAYOUT_LIST
-            ? JSON.parse(process.env.CUSTOM_PAYOUT_LIST)
-            : {};
 
         this.walletRedirections = process.env.CUSTOM_REDIRECTIONS
             ? JSON.parse(process.env.CUSTOM_REDIRECTIONS)
@@ -207,7 +241,7 @@ export class Config {
 
         this.vendorField = process.env.VENDORFIELD_MESSAGE
             ? process.env.VENDORFIELD_MESSAGE
-            : "`Voter Share.";
+            : "Voter Share.";
         this.vendorFieldAdmin = process.env.VENDORFIELD_ADMINISTRATIVE_MESSAGE
             ? process.env.VENDORFIELD_ADMINISTRATIVE_MESSAGE
             : "Delegate Fee.";
@@ -218,28 +252,30 @@ export class Config {
             ? this.processAdmins(JSON.parse(process.env.ADMIN_PAYOUT_LIST))
             : [];
 
-        this.seed = process.env.SECRET ? process.env.SECRET : null;
+        this.seed = process.env.SECRET ? process.env.SECRET : "";
         this.secondPassphrase = process.env.SECOND_SECRET
             ? process.env.SECOND_SECRET
-            : null;
+            : "";
 
         this.businessSeed = process.env.BUSINESS_SECRET
             ? process.env.BUSINESS_SECRET
-            : null;
+            : "";
         this.businessSecondPassphrase = process.env.BUSINESS_SECOND_SECRET
             ? process.env.BUSINESS_SECOND_SECRET
-            : null;
+            : "";
 
         this.transactionsPerRequest = process.env.MAX_TRANSACTIONS_PER_REQUEST
             ? parseInt(process.env.MAX_TRANSACTIONS_PER_REQUEST, 10)
             : 40;
 
-        this.transactionsPerMultitransfer = process.env.MAX_TRANSFERS_PER_MULTI
+        this.transactionsPerMultiTransfer = process.env.MAX_TRANSFERS_PER_MULTI
             ? parseInt(process.env.MAX_TRANSFERS_PER_MULTI, 10)
             : 64;
     }
 
-    public processSmallWalletBonus(smallWalletBonusConfig): SmallWalletBonus {
+    public processSmallWalletBonus(
+        smallWalletBonusConfig: SmallWalletBonusConfig
+    ): SmallWalletBonus {
         if (
             !smallWalletBonusConfig.hasOwnProperty("walletLimit") ||
             !smallWalletBonusConfig.hasOwnProperty("percentage")
@@ -265,21 +301,25 @@ export class Config {
         return smallWalletBonus;
     }
 
-    public processAdmins(admins): Receiver[] {
+    public processAdmins(admins: Record<string, AdminShareConfig>): Receiver[] {
         const receivers: Receiver[] = [];
         let totalPercentage = new BigNumber(0);
-        for (const wallet in admins) {
-            if (admins.hasOwnProperty(wallet)) {
+
+        for (const admin in admins) {
+            if (admins.hasOwnProperty(admin)) {
+                const percentage: BigNumber = admins[admin].hasOwnProperty(
+                    "percentage"
+                )
+                    ? new BigNumber(admins[admin].percentage)
+                    : new BigNumber(1);
                 const receiver: Receiver = {
-                    percentage: admins[wallet].hasOwnProperty("percentage")
-                        ? new BigNumber(admins[wallet].percentage)
-                        : new BigNumber(1),
-                    vendorField: admins[wallet].hasOwnProperty("vendorField")
-                        ? admins[wallet].vendorField
+                    percentage,
+                    vendorField: admins[admin].hasOwnProperty("vendorField")
+                        ? admins[admin].vendorField
                         : this.vendorFieldAdmin,
-                    wallet,
+                    wallet: admin,
                 };
-                totalPercentage = totalPercentage.plus(receiver.percentage);
+                totalPercentage = totalPercentage.plus(percentage);
                 if (totalPercentage.gt(1)) {
                     throw new TypeError("Admin payout percentage exceeds 100%");
                 }

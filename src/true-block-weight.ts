@@ -10,6 +10,7 @@ export class TrueBlockWeight {
     private readonly config: Config;
     private readonly network: Network;
     private transactionEngine: TransactionEngine;
+    private delegateName: string = "";
 
     constructor() {
         try {
@@ -27,6 +28,14 @@ export class TrueBlockWeight {
      */
     public async calculate(): Promise<Transfers> {
         try {
+            const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
+            this.delegateName = await this.network.getDelegateNameForSeed(
+                this.config.seed
+            );
+            logger.info(
+                `Calculating for delegate: ${this.delegateName} on ${networkConfig.network.client.token}`
+            );
+            logger.info(SEPARATOR);
             const trueBlockWeightEngine: TrueBlockWeightEngine = new TrueBlockWeightEngine();
             const payouts: Payouts = await trueBlockWeightEngine.generatePayouts();
             const transfers: Transfers = await this.generateTransactions(
@@ -65,29 +74,83 @@ export class TrueBlockWeight {
 
             logger.info(SEPARATOR);
             logger.info(
-                `Ready to Payout from Delegate Account: ${transfers.totalAmount
+                `Ready to transfer from delegate wallet: ${transfers.totalAmount
+                    .plus(transfers.totalFees)
                     .div(ARKTOSHI)
-                    .toFixed(8)} + ${transfers.totalFees
-                    .div(ARKTOSHI)
-                    .toFixed(8)} fees.`
+                    .toFixed(8)}`
             );
+            const delegateBalance: BigNumber = await this.network.getBalanceForSeed(
+                this.config.seed
+            );
+            if (
+                delegateBalance.lt(
+                    transfers.totalAmount.plus(transfers.totalFees)
+                )
+            ) {
+                logger.error(
+                    `Balance of delegate wallet is not sufficient! Balance: ${delegateBalance
+                        .div(ARKTOSHI)
+                        .toFixed(8)}`
+                );
+                logger.info(SEPARATOR);
+                process.exit(1);
+            } else {
+                logger.info(
+                    `Balance for delegate wallet: ${delegateBalance
+                        .div(ARKTOSHI)
+                        .toFixed(8)} (+${delegateBalance
+                        .minus(transfers.totalAmount.plus(transfers.totalFees))
+                        .div(ARKTOSHI)
+                        .toFixed(8)})`
+                );
+            }
             if (transfers.businessTransactions.length > 0) {
                 for (const item of transfers.businessTransactions) {
                     transfers.transactions.push(item);
                 }
                 logger.info(
-                    `Ready to payout from Business Account: ${transfers.totalBusinessAmount
-                        .div(ARKTOSHI)
-                        .toFixed(8)} + ${transfers.totalBusinessFees
-                        .div(ARKTOSHI)
-                        .toFixed(8)} fees.`
+                    `Ready to transfer from business wallet: ${transfers.totalBusinessAmount
+                        .plus(transfers.totalBusinessFees)
+                        .div(ARKTOSHI)}`
                 );
+
+                const businessBalance: BigNumber = await this.network.getBalanceForSeed(
+                    this.config.businessSeed
+                );
+                if (
+                    businessBalance.lt(
+                        transfers.totalBusinessAmount.plus(
+                            transfers.totalBusinessFees
+                        )
+                    )
+                ) {
+                    logger.error(
+                        `Balance of business wallet is not sufficient! Balance: ${businessBalance
+                            .div(ARKTOSHI)
+                            .toFixed(8)}`
+                    );
+                    logger.info(SEPARATOR);
+                    process.exit(1);
+                } else {
+                    logger.info(
+                        `Balance for business wallet: ${businessBalance
+                            .div(ARKTOSHI)
+                            .toFixed(8)} (+${businessBalance
+                            .minus(
+                                transfers.totalBusinessAmount.plus(
+                                    transfers.totalBusinessFees
+                                )
+                            )
+                            .div(ARKTOSHI)
+                            .toFixed(8)})`
+                    );
+                }
             }
             logger.info(SEPARATOR);
+
             return transfers;
         } catch (error) {
-            logger.error(error.message);
-            return null;
+            throw error;
         }
     }
 
@@ -155,15 +218,14 @@ export class TrueBlockWeight {
 
         const receivers: Receiver[] = [];
         const businessReceivers: Receiver[] = [];
-        for (const [address] of payouts.payouts) {
+        for (const [address, amount] of payouts.payouts) {
             const wallet: string = this.getRedirectAddress(address);
             logger.info(
-                `Delegate Share to ${wallet} prepared: ${payouts.payouts
-                    .get(address)
+                `Reward share to ${wallet} prepared: ${amount
                     .div(ARKTOSHI)
                     .toFixed(8)}`
             );
-            const amount: BigNumber = payouts.payouts.get(address);
+
             const receiver: Receiver = {
                 amount,
                 wallet,
@@ -172,30 +234,27 @@ export class TrueBlockWeight {
                 totalAmount = totalAmount.plus(amount);
                 receivers.push(receiver);
 
-                const businessAmount: BigNumber = payouts.businessPayouts.get(
-                    address
-                );
-                if (businessAmount.gt(0)) {
-                    totalBusinessAmount = totalBusinessAmount.plus(
-                        businessAmount
-                    );
+                const businessAmount = payouts.businessPayouts.get(address);
+
+                if (businessAmount && new BigNumber(businessAmount).gt(0)) {
+                    const amount: BigNumber = new BigNumber(businessAmount);
+                    totalBusinessAmount = totalBusinessAmount.plus(amount);
                     const receiver: Receiver = {
-                        amount: businessAmount,
+                        amount,
                         wallet,
                     };
-                    if (businessAmount.gt(0)) {
-                        businessReceivers.push(receiver);
-                        logger.info(
-                            `Business Share to ${wallet} prepared: ${businessAmount
-                                .div(ARKTOSHI)
-                                .toFixed(8)}`
-                        );
-                    }
+
+                    businessReceivers.push(receiver);
+                    logger.info(
+                        `Business share to ${wallet} prepared: ${amount
+                            .div(ARKTOSHI)
+                            .toFixed(8)}`
+                    );
                 }
             }
         }
 
-        let vendorField: string = `${this.config.delegate} - ${this.config.vendorField}`;
+        let vendorField: string = `${this.delegateName} - ${this.config.vendorField}`;
         const transactions: Interfaces.ITransactionData[] = await this.transactionEngine.createMultiPayment(
             receivers,
             payouts.timestamp.toNumber(),
@@ -208,7 +267,7 @@ export class TrueBlockWeight {
             this.config.multiTransferFee.times(transactions.length)
         );
 
-        vendorField = `${this.config.delegate} - Business Revenue Share.`;
+        vendorField = `${this.delegateName} - Business Revenue Share.`;
         const businessTransactions: Interfaces.ITransactionData[] = await this.transactionEngine.createMultiPayment(
             businessReceivers,
             payouts.timestamp.toNumber(),
@@ -253,24 +312,28 @@ export class TrueBlockWeight {
         totalAmount: BigNumber,
         timestamp: number
     ): Promise<Interfaces.ITransactionData[]> {
+        if (totalAmount.lte(0)) {
+            throw new Error("There is no amount to share with admins.");
+        }
+
         let payoutAmount: BigNumber = new BigNumber(0);
         const adminReceivers: Receiver[] = [];
 
         for (const admin of this.config.admins) {
-            const amount: BigNumber = totalAmount.times(admin.percentage);
-            const vendorField: string = `${this.config.delegate} - ${admin.vendorField}`;
-            const receiver: Receiver = {
-                amount,
-                vendorField,
-                wallet: admin.wallet,
-            };
-            if (receiver.amount.gt(0)) {
+            if (admin.percentage && new BigNumber(admin.percentage).gt(0)) {
+                const amount: BigNumber = totalAmount.times(admin.percentage);
+                const vendorField: string = `${this.delegateName} - ${admin.vendorField}`;
+                const receiver: Receiver = {
+                    amount,
+                    vendorField,
+                    wallet: admin.wallet,
+                };
                 adminReceivers.push(receiver);
                 payoutAmount = payoutAmount.plus(amount);
                 logger.info(
-                    `Administrative Payout to ${
-                        admin.wallet
-                    } prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
+                    `Admin share to ${admin.wallet} prepared: ${amount
+                        .div(ARKTOSHI)
+                        .toFixed(8)}`
                 );
             }
         }
@@ -289,10 +352,6 @@ export class TrueBlockWeight {
             return [];
         }
 
-        // for (const item of adminTransactions) {
-        //    const admin: string = item.recipientId;
-        //    const amount: BigNumber = new BigNumber(item.amount.toString());
-        // }
         return adminTransactions;
     }
 
@@ -306,18 +365,16 @@ export class TrueBlockWeight {
         timestamp: number
     ): Promise<Interfaces.ITransactionData> {
         if (amount.isNaN() || amount.lte(0)) {
-            return null;
+            throw new Error("Bad license fee calculated.");
         }
-        logger.info(
-            `License fee payout prepared: ${amount.div(ARKTOSHI).toFixed(8)}`
-        );
+        logger.info(`License fee prepared: ${amount.div(ARKTOSHI).toFixed(8)}`);
 
         const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
         let networkVersion: number = 88;
         if (networkConfig !== null) {
             networkVersion = networkConfig.network.pubKeyHash;
         }
-        const vendorField: string = `${this.config.delegate} - ${this.config.vendorFieldDonation}`;
+        const vendorField: string = `${this.delegateName} - ${this.config.vendorFieldDonation}`;
         const wallet: string = Identities.Address.fromPublicKey(
             PUBLICKEY,
             networkVersion

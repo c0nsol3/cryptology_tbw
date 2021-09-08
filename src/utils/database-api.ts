@@ -1,4 +1,5 @@
 import BigNumber from "bignumber.js";
+// @ts-ignore
 import { Result } from "pg";
 import {
     Block,
@@ -9,11 +10,14 @@ import {
     Voter,
     VoterBlock,
     VoterMutation,
+    VoterSinceTransaction,
+    VoterDuration,
     VoteTransaction,
 } from "../interfaces";
 import { logger, Postgres } from "../services";
 import { Crypto } from "./crypto";
 import {
+    getCurrentVotersSince,
     getDelegateTransactions,
     getForgedBlocks,
     getTransactions,
@@ -80,15 +84,11 @@ export class DatabaseAPI {
      * @param delegatePublicKey
      * @param startBlockHeight
      * @param endBlockHeight
-     * @param payoutSignature
-     * @param noSignature In case a Blockchain doesn't use a VendorField (e.g. like NOS)
      */
     public async getDelegatePayoutTransactions(
         delegatePublicKey: string,
         startBlockHeight: number,
-        endBlockHeight: number,
-        payoutSignature: string,
-        noSignature: boolean
+        endBlockHeight: number
     ): Promise<DelegateTransaction[]> {
         const getDelegateTransactionsQuery = getDelegateTransactions(
             startBlockHeight,
@@ -102,7 +102,7 @@ export class DatabaseAPI {
         await this.psql.close();
 
         if (result.rows.length === 0) {
-            logger.info("No Delegate payouts retrieved.");
+            logger.info("No delegate payouts retrieved.");
             return [];
         }
         const delegatePayoutTransactions: DelegateTransaction[] = [];
@@ -122,14 +122,56 @@ export class DatabaseAPI {
         }
 
         logger.info(
-            `${delegatePayoutTransactions.length} Delegate Payout Transactions retrieved.`
+            `${delegatePayoutTransactions.length} Delegate payout transactions retrieved.`
         );
 
         return delegatePayoutTransactions;
     }
 
+    public async getCurrentVotersSince(
+        delegatePublicKey: string,
+        networkVersion: number,
+        timestamp: BigNumber
+    ): Promise<Map<string, BigNumber>> {
+        const getCurrentVotersQuery: string = getCurrentVotersSince(
+            delegatePublicKey
+        );
+
+        await this.psql.connect();
+        const result: Result = await this.psql.query(getCurrentVotersQuery);
+        await this.psql.close();
+
+        if (result.rows.length === 0) {
+            logger.warn(`There are no current voters.`);
+            return new Map();
+        }
+
+        try {
+            const voters: VoterDuration[] = result.rows.map(
+                (transaction: VoterSinceTransaction) => {
+                    const address: string = Crypto.getAddressFromPublicKey(
+                        transaction.senderPublicKey,
+                        networkVersion
+                    );
+                    return {
+                        address,
+                        duration: new BigNumber(timestamp).minus(
+                            new BigNumber(transaction.timestamp)
+                        ),
+                    };
+                }
+            );
+
+            return new Map(
+                voters.map((voter) => [voter.address, voter.duration])
+            );
+        } catch (e) {
+            throw e;
+        }
+    }
+
     /**
-     * Get all the votes/unvotes for this delegate that are within range.
+     * Get all the votes/un-votes for this delegate that are within range.
      * @param delegatePublicKey
      * @param startBlockHeight
      * @param networkVersion
@@ -140,57 +182,81 @@ export class DatabaseAPI {
         networkVersion: number
     ): Promise<VoterMutation[]> {
         const getVoterSinceHeightQuery: string = getVoterSinceHeight(
-            startBlockHeight
+            startBlockHeight,
+            delegatePublicKey
         );
         await this.psql.connect();
         const result: Result = await this.psql.query(getVoterSinceHeightQuery);
         await this.psql.close();
 
         if (result.rows.length === 0) {
-            logger.warn("0 Voter mutations retrieved.");
+            logger.info("No Voter mutations retrieved from database.");
             return [];
         }
 
         try {
-            const voterMutations: VoterMutation[] = result.rows
-                .map((transaction: VoteTransaction) => {
+            const voterMutations: VoterMutation[] = result.rows.map(
+                (transaction: VoteTransaction) => {
                     const address: string = Crypto.getAddressFromPublicKey(
                         transaction.senderPublicKey,
                         networkVersion
+                    );
+
+                    const vote: string = DatabaseAPI.selectVote(
+                        transaction.asset.votes,
+                        delegatePublicKey
                     );
                     return {
                         height: new BigNumber(
                             transaction.height
                         ).integerValue(),
                         address,
-                        vote: transaction.asset.votes[0],
+                        vote,
                     };
-                })
-                .filter((transaction: VoterMutation) => {
-                    return (
-                        transaction.vote &&
-                        transaction.vote.includes(`${delegatePublicKey}`)
-                    );
-                });
+                }
+            );
 
-            logger.info(`${voterMutations.length} Voter mutations retrieved.`);
+            logger.info(`${voterMutations.length} Voter mutations processed.`);
             for (const vote in voterMutations) {
                 if (voterMutations[vote]) {
                     const votingTransaction: VoterMutation =
                         voterMutations[vote];
                     const voterAction = votingTransaction.vote.startsWith("+")
                         ? "voted"
-                        : "unvoted";
+                        : votingTransaction.vote.startsWith("-")
+                        ? "un-voted"
+                        : "un-voted and voted";
                     logger.info(
                         `Vote: ${votingTransaction.address} ${voterAction} at blockHeight ${votingTransaction.height}`
                     );
                 }
             }
-            return voterMutations;
+            return voterMutations.filter((votingTransaction) => {
+                return (
+                    votingTransaction.vote.startsWith("+") ||
+                    votingTransaction.vote.startsWith("-")
+                );
+            });
         } catch (e) {
-            logger.info("0 Voter mutations retrieved.");
+            logger.error("0 Voter mutations retrieved.");
             return [];
         }
+    }
+
+    private static selectVote(
+        votes: string[],
+        delegatePublicKey: string
+    ): string {
+        if (votes.length === 2) {
+            if (votes[0].substr(1) === votes[1].substr(1)) {
+                return "";
+            }
+            if (votes[1].substr(1) === delegatePublicKey) {
+                return votes[1];
+            }
+        }
+
+        return votes[0];
     }
 
     /**
@@ -221,18 +287,18 @@ export class DatabaseAPI {
 
         const votingDelegateBlocks: VoterBlock[] = [];
         for (const item of result.rows) {
-            if (
-                item.hasOwnProperty("generator_public_key") &&
-                wallets.has(item.generator_public_key)
-            ) {
-                const address: string = wallets.get(item.generator_public_key);
-                const block: VoterBlock = {
-                    address,
-                    height: parseInt(item.height, 10),
-                    fees: new BigNumber(item.total_fee),
-                    reward: new BigNumber(item.reward),
-                };
-                votingDelegateBlocks.push(block);
+            const generatorPublicKey = item.generator_public_key;
+            if (generatorPublicKey) {
+                const address = wallets.get(generatorPublicKey);
+                if (address) {
+                    const block: VoterBlock = {
+                        address,
+                        height: parseInt(item.height, 10),
+                        fees: new BigNumber(item.total_fee),
+                        reward: new BigNumber(item.reward),
+                    };
+                    votingDelegateBlocks.push(block);
+                }
             }
         }
 
@@ -283,7 +349,7 @@ export class DatabaseAPI {
                           item.senderPublicKey,
                           networkVersion
                       )
-                    : null,
+                    : "",
                 amount: new BigNumber(item.amount),
                 recipientId: item.type === 0 ? item.recipientId : null,
                 multiPayment:

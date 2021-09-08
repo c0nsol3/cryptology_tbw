@@ -10,6 +10,7 @@ import {
     VoterMutation,
 } from "../interfaces";
 import { logger } from "./";
+import { Crypto } from "../utils";
 
 export class Network {
     private readonly server: string;
@@ -72,13 +73,10 @@ export class Network {
             const walletInfo: APIResults = await this.getFromAPI(
                 `/api/wallets/${wallet}`
             );
-            const nonce: number =
-                walletInfo.hasOwnProperty("data") &&
+            return walletInfo.hasOwnProperty("data") &&
                 walletInfo.data.hasOwnProperty("nonce")
-                    ? parseInt(walletInfo.data.nonce, 10)
-                    : null;
-            logger.info(`Nonce loaded for ${wallet}: ${nonce}`);
-            return nonce;
+                ? parseInt(walletInfo.data.nonce, 10)
+                : Number.NaN;
         } catch (e) {
             throw new Error(
                 `Can't load nonce for ${wallet}. Please check your node(s) configuration.`
@@ -124,6 +122,61 @@ export class Network {
         throw new Error("Could not connect to any of the configured nodes.");
     }
 
+    public async getBalanceForSeed(seed: string): Promise<BigNumber> {
+        const publicKey: string = Crypto.getPublicKeyFromSeed(seed);
+        const getWalletByPubKLeyEndpoint: string = `/api/wallets?publicKey=${publicKey}`;
+        const delegateNameAPIResults: APIResults = await this.getFromAPI(
+            getWalletByPubKLeyEndpoint
+        );
+
+        if (
+            delegateNameAPIResults &&
+            delegateNameAPIResults.hasOwnProperty("data") &&
+            delegateNameAPIResults.data.length > 0 &&
+            delegateNameAPIResults.data[0].hasOwnProperty("balance") &&
+            delegateNameAPIResults.data[0].balance
+        ) {
+            return new BigNumber(delegateNameAPIResults.data[0].balance);
+        }
+
+        throw new Error("Could not retrieve wallet balance.");
+    }
+
+    public async getDelegateNameForSeed(seed: string): Promise<string> {
+        const publicKey: string = Crypto.getPublicKeyFromSeed(seed);
+        const getWalletByPubKLeyEndpoint: string = `/api/wallets?publicKey=${publicKey}`;
+        const delegateNameAPIResults: APIResults = await this.getFromAPI(
+            getWalletByPubKLeyEndpoint
+        );
+
+        if (
+            delegateNameAPIResults &&
+            delegateNameAPIResults.hasOwnProperty("data") &&
+            delegateNameAPIResults.data.length > 0 &&
+            delegateNameAPIResults.data[0].hasOwnProperty("username") &&
+            delegateNameAPIResults.data[0].username
+        ) {
+            return delegateNameAPIResults.data[0].username;
+        }
+
+        // Core V3
+        if (
+            delegateNameAPIResults &&
+            delegateNameAPIResults.hasOwnProperty("data") &&
+            delegateNameAPIResults.data.length > 0 &&
+            delegateNameAPIResults.data[0].hasOwnProperty("attributes") &&
+            delegateNameAPIResults.data[0].attributes.hasOwnProperty("delegate") &&
+            delegateNameAPIResults.data[0].attributes.delegate.hasOwnProperty("username") &&
+            delegateNameAPIResults.data[0].attributes.delegate.username
+        ) {
+            return delegateNameAPIResults.data[0].attributes.delegate.username;
+        }
+
+        throw new Error(
+            "Could not retrieve delegate data: does the configured seed belong to a delegate wallet?"
+        );
+    }
+
     /**
      * @dev Retrieve the delegate public key from the API
      */
@@ -165,10 +218,11 @@ export class Network {
 
     /**
      *
-     * @param delegate
+     * @param seed
      */
-    public async getVoters(delegate: string): Promise<Voter[]> {
+    public async getVoters(seed: string): Promise<Voter[]> {
         try {
+            const delegate: string = await this.getDelegateNameForSeed(seed);
             const getVotersEndpoint: string = `/api/delegates/${delegate}/voters`;
             const params = {
                 page: 1,
@@ -355,7 +409,7 @@ export class Network {
                     `Sending ${transactions.length} transactions to ${node}.`
                 );
                 const response = await axios.post(
-                    `${node}/api/v2/transactions`,
+                    `${node}/api/transactions`,
                     {
                         transactions,
                     },

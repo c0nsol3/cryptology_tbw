@@ -6,6 +6,16 @@ export interface SmallWalletBonus {
     percentage: BigNumber;
 }
 
+export interface SmallWalletBonusConfig {
+    walletLimit: number;
+    percentage: number;
+}
+
+export interface AdminShareConfig {
+    percentage: number;
+    vendorField?: string;
+}
+
 export interface DatabaseConfig {
     user: string;
     host: string;
@@ -56,6 +66,16 @@ export interface Voter {
     username?: string;
 }
 
+export interface VoterDuration {
+    address: string;
+    duration: BigNumber;
+}
+
+export interface DurationShare {
+    duration: number;
+    percentage: number;
+}
+
 export interface Voters {
     votersPerForgedBlock: Map<number, string[]>;
     voters: string[];
@@ -103,6 +123,12 @@ export interface Block {
 
 export interface VoteTransaction {
     height: number;
+    asset: any;
+    senderPublicKey: string;
+}
+
+export interface VoterSinceTransaction {
+    timestamp: number;
     asset: any;
     senderPublicKey: string;
 }

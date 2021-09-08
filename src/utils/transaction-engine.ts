@@ -9,8 +9,8 @@ import { Crypto } from "./crypto";
 export class TransactionEngine {
     private readonly config: Config;
     private readonly network: Network;
-    private nonce: number = null;
-    private businessNonce: number = null;
+    private nonce: number = Number.NaN;
+    private businessNonce: number = Number.NaN;
 
     constructor() {
         BigNumber.config({
@@ -47,64 +47,73 @@ export class TransactionEngine {
         await this.setupNetwork();
         const transactions: Interfaces.ITransactionData[] = [];
 
-        for (
-            let i = 0;
-            i < receivers.length;
-            i += this.config.transactionsPerMultitransfer
-        ) {
-            const chunk: Receiver[] = receivers.slice(
-                i,
-                i + this.config.transactionsPerMultitransfer
-            );
-
-            if (chunk.length === 1) {
-                const receiver: Receiver = {
-                    wallet: chunk[0].wallet,
-                    amount: chunk[0].amount,
-                    vendorField,
-                };
-                const transaction: Interfaces.ITransactionData = await this.createTransaction(
-                    receiver,
-                    timestamp,
-                    business
+        try {
+            for (
+                let i = 0;
+                i < receivers.length;
+                i += this.config.transactionsPerMultiTransfer
+            ) {
+                const chunk: Receiver[] = receivers.slice(
+                    i,
+                    i + this.config.transactionsPerMultiTransfer
                 );
-                transactions.push(transaction);
-            } else {
-                let nonce: string;
-                if (business) {
-                    this.businessNonce += 1;
-                    nonce = this.businessNonce.toString();
-                } else {
-                    this.nonce += 1;
-                    nonce = this.nonce.toString();
-                }
-                let transaction: MultiPaymentBuilder = Transactions.BuilderFactory.multiPayment()
-                    .fee(this.config.multiTransferFee.toFixed(0))
-                    .nonce(nonce);
 
-                if (!this.config.noSignature) {
-                    transaction = transaction.vendorField(vendorField);
-                }
-
-                for (const receiver of chunk) {
-                    transaction.addPayment(
-                        receiver.wallet,
-                        receiver.amount.toFixed(0)
+                if (chunk.length === 1) {
+                    const receiver: Receiver = {
+                        wallet: chunk[0].wallet,
+                        amount: chunk[0].amount,
+                        vendorField,
+                    };
+                    const transaction: Interfaces.ITransactionData = await this.createTransaction(
+                        receiver,
+                        timestamp,
+                        business
                     );
-                }
-                if (timestamp) {
-                    transaction.data.timestamp = timestamp;
-                }
+                    transactions.push(transaction);
+                } else {
+                    let nonce: string;
+                    if (business) {
+                        this.businessNonce += 1;
+                        nonce = this.businessNonce.toString();
+                    } else {
+                        this.nonce += 1;
+                        nonce = this.nonce.toString();
+                    }
 
-                transaction = transaction.sign(seed);
+                    let transaction: MultiPaymentBuilder = Transactions.BuilderFactory.multiPayment()
+                        .fee(this.config.multiTransferFee.toFixed(0))
+                        .nonce(nonce);
 
-                if (secondPassphrase !== null) {
-                    transaction = transaction.secondSign(secondPassphrase);
+                    if (!this.config.noSignature) {
+                        transaction = transaction.vendorField(vendorField);
+                    }
+
+                    for (const receiver of chunk) {
+                        const amount = receiver.amount;
+                        if (amount) {
+                            transaction.addPayment(
+                                receiver.wallet,
+                                amount.toFixed(0)
+                            );
+                        }
+                    }
+                    if (timestamp) {
+                        transaction.data.timestamp = timestamp;
+                    }
+
+                    transaction = transaction.sign(seed);
+
+                    if (secondPassphrase !== "") {
+                        transaction = transaction.secondSign(secondPassphrase);
+                    }
+                    transactions.push(transaction.getStruct());
                 }
-                transactions.push(transaction.getStruct());
             }
+            return transactions;
+        } catch (e) {
+            logger.error(e);
+            throw e;
         }
-        return transactions;
     }
 
     /**
@@ -128,18 +137,25 @@ export class TransactionEngine {
             this.nonce += 1;
             nonce = this.nonce.toString();
         }
-
+        let amount = receiver.amount;
+        if (amount === undefined) {
+            amount = new BigNumber(0);
+        }
         let transaction: TransferBuilder = Transactions.BuilderFactory.transfer()
-            .amount(receiver.amount.toFixed(0))
+            .amount(amount.toFixed(0))
             .recipientId(receiver.wallet)
             .fee(this.config.transferFee.toFixed(0))
             .nonce(nonce);
 
         if (!this.config.noSignature) {
-            transaction = transaction.vendorField(receiver.vendorField);
+            let vendorField = receiver.vendorField;
+            if (vendorField === undefined) {
+                vendorField = "";
+            }
+            transaction = transaction.vendorField(vendorField);
             if (
-                Buffer.from(receiver.vendorField).length > 64 &&
-                Buffer.from(receiver.vendorField).length <= 255
+                Buffer.from(vendorField).length > 64 &&
+                Buffer.from(vendorField).length <= 255
             ) {
                 transaction.data.vendorField = this.config.vendorField;
             }
@@ -151,7 +167,7 @@ export class TransactionEngine {
 
         transaction = transaction.sign(this.config.seed);
 
-        if (this.config.secondPassphrase !== null) {
+        if (this.config.secondPassphrase !== "") {
             transaction = transaction.secondSign(this.config.secondPassphrase);
         }
 
@@ -176,18 +192,22 @@ export class TransactionEngine {
         Managers.configManager.setHeight(height);
 
         const milestone = Managers.configManager.getMilestone(height);
-        this.config.transactionsPerMultitransfer = Math.min(
-            this.config.transactionsPerMultitransfer,
+        this.config.transactionsPerMultiTransfer = Math.min(
+            this.config.transactionsPerMultiTransfer,
             milestone.multiPaymentLimit
         );
 
-        if (this.nonce === null) {
-            this.nonce = await this.network.getNonceForDelegate(
-                this.config.delegate
+        if (Number.isNaN(this.nonce)) {
+            const delegateName: string = await this.network.getDelegateNameForSeed(
+                this.config.seed
             );
+            this.nonce = await this.network.getNonceForDelegate(delegateName);
         }
 
-        if (this.businessNonce === null && this.config.businessSeed !== null) {
+        if (
+            Number.isNaN(this.businessNonce) &&
+            this.config.businessSeed !== ""
+        ) {
             const businessPublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.businessSeed
             );

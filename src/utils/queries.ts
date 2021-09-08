@@ -17,7 +17,7 @@ export const getForgedBlocks = (
           WHERE blocks."generator_public_key" = '${publicKey}' \
           AND blocks.height >= ${startBlockHeight}`;
 
-    if (endBlockHeight) {
+    if (Number.isInteger(endBlockHeight)) {
         query = `${query} AND blocks.height <= ${endBlockHeight}`;
     }
 
@@ -39,7 +39,7 @@ export const getVotingDelegates = (
           FROM blocks \
           WHERE blocks.height >= ${startBlockHeight}`;
 
-    if (endBlockHeight) {
+    if (Number.isInteger(endBlockHeight)) {
         query = `${query} AND blocks.height <= ${endBlockHeight}`;
     }
 
@@ -48,15 +48,31 @@ export const getVotingDelegates = (
     return query;
 };
 
+export const getCurrentVotersSince = (delegatePublicKey: string): string => {
+    return `SELECT * FROM ( \
+    SELECT DISTINCT ON (transactions."sender_public_key") transactions."sender_public_key" AS "senderPublicKey", \
+    transactions."asset", transactions."timestamp" \
+    FROM transactions \
+    WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
+    AND transactions."asset"->>'votes' LIKE '%+${delegatePublicKey}%' \
+    ORDER BY transactions."sender_public_key", transactions."timestamp" DESC ) t \
+    ORDER BY t."timestamp" DESC;`;
+};
+
 /**
  *
  * @param startBlockHeight
+ * @param delegatePublicKey
  */
-export const getVoterSinceHeight = (startBlockHeight: number): string => {
+export const getVoterSinceHeight = (
+    startBlockHeight: number,
+    delegatePublicKey: string
+): string => {
     return `SELECT transactions."asset", transactions."sender_public_key" AS "senderPublicKey", \ 
-          transactions."recipient_id" AS "recipientId", blocks."height" \
+          blocks."height" \
           FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
           WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
+          AND transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%'
           AND blocks.height >= ${startBlockHeight} ORDER BY blocks."height" ASC;`;
 };
 
@@ -84,7 +100,7 @@ export const getTransactions = (
           FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
           WHERE blocks."height" >= ${startBlockHeight}`;
 
-    if (endBlockHeight) {
+    if (Number.isInteger(endBlockHeight)) {
         query = `${query} AND blocks.height <= ${endBlockHeight}`;
     }
 
@@ -113,7 +129,7 @@ export const getDelegateTransactions = (
           AND transactions."type_group" = 1 \
           AND (transactions."type" = 6 OR transactions."type" = 0)`;
 
-    if (endBlockHeight) {
+    if (Number.isInteger(endBlockHeight)) {
         query = `${query} AND blocks.height <= ${endBlockHeight}`;
     }
 
