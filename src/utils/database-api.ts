@@ -17,6 +17,7 @@ import {
 import { logger, Postgres } from "../services";
 import { Crypto } from "./crypto";
 import {
+    checkColumnExists,
     getCurrentVotersSince,
     getDelegateTransactions,
     getForgedBlocks,
@@ -46,13 +47,29 @@ export class DatabaseAPI {
         historyAmountBlocks: number
     ): Promise<ForgedBlock[]> {
         await this.psql.connect();
+
+        const checkColumnExistsQuery: string = checkColumnExists(
+            "blocks",
+            "burned_fee"
+        );
+
+        let result: Result = await this.psql.query(checkColumnExistsQuery);
+
+        let subtractBurnedFees = false;
+        if (result.rows.length === 1) {
+            subtractBurnedFees = true;
+        }
+
         const getForgedBlocksQuery: string = getForgedBlocks(
             delegatePublicKey,
             startBlockHeight,
             endBlockHeight,
-            historyAmountBlocks
+            historyAmountBlocks,
+            subtractBurnedFees
         );
-        const result: Result = await this.psql.query(getForgedBlocksQuery);
+
+        result = await this.psql.query(getForgedBlocksQuery);
+
         await this.psql.close();
 
         if (result.rows.length === 0) {

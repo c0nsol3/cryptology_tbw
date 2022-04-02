@@ -1,5 +1,16 @@
 /**
  *
+ * @param tableName
+ * @param columnName
+ */
+export const checkColumnExists = (
+    tableName: string,
+    columnName: string
+): string =>
+    `SELECT 1 FROM information_schema.columns WHERE table_name = '${tableName}' and column_name = '${columnName}';`;
+
+/**
+ *
  * @param publicKey
  * @param startBlockHeight
  * @param endBlockHeight
@@ -9,10 +20,15 @@ export const getForgedBlocks = (
     publicKey: string,
     startBlockHeight: number,
     endBlockHeight: number,
-    limit: number
+    limit: number,
+    subtractBurnedFees: boolean
 ): string => {
     let query = `SELECT blocks.height, blocks.timestamp, blocks.reward, \
-                        blocks.total_fee AS "totalFee" \
+                        ${
+                            subtractBurnedFees
+                                ? "(blocks.total_fee - blocks.burned_fee)"
+                                : "blocks.total_fee"
+                        } AS "totalFee" \
           FROM public.blocks \
           WHERE blocks."generator_public_key" = '${publicKey}' \
           AND blocks.height >= ${startBlockHeight}`;
