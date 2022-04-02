@@ -55,10 +55,7 @@ export class DatabaseAPI {
 
         let result: Result = await this.psql.query(checkColumnExistsQuery);
 
-        let subtractBurnedFees = false;
-        if (result.rows.length === 1) {
-            subtractBurnedFees = true;
-        }
+        const subtractBurnedFees = result.rows.length === 1;
 
         const getForgedBlocksQuery: string = getForgedBlocks(
             delegatePublicKey,
