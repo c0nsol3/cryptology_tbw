@@ -9875,9 +9875,11 @@ node-fetch-npm@^2.0.2:
     safe-buffer "^5.1.1"
 
 node-fetch@^2.2.0, node-fetch@^2.3.0, node-fetch@^2.5.0:
-  version "2.6.0"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.0.tgz#e633456386d4aa55863f676a7ab0daa8fdecb0fd"
-  integrity sha512-8dG4H5ujfvFiqDmVu9fQ5bOHUC15JMjMY/Zumv26oOvvVJjM67KF8koCWIabKQ1GJIa9r2mMZscBq/TbdOcmNA==
+  version "2.6.7"
+  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.7.tgz#24de9fba827e3b4ae44dc8b20256a379160052ad"
+  integrity sha512-ZjMPFEfVx5j+y2yF35Kzx5sF7kDzxuDj6ziH4FFbOp87zKDZNx8yExJIb05OGF4Nlt9IHFIMBkRl41VdvcNdbQ==
+  dependencies:
+    whatwg-url "^5.0.0"
 
 node-gyp@^5.0.2:
   version "5.0.5"
@@ -10300,11 +10302,6 @@ object.pick@^1.3.0:
   integrity sha1-h6EKxMFpS9Lhy/U1kaZhQftd10c=
   dependencies:
     isobject "^3.0.1"
-
-obuf@~1.1.2:
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/obuf/-/obuf-1.1.2.tgz#09bea3343d41859ebd446292d11c9d4db619084e"
-  integrity sha512-PX1wu0AmAdPqOL1mWhqmlOd8kOIZQwGZw6rh7uby9fTc5lhaOWFLX3I6R1hrF9k3zUY40e6igsLGkDXK92LJNg==
 
 octokit-pagination-methods@^1.1.0:
   version "1.1.0"
@@ -10850,11 +10847,6 @@ pg-int8@1.0.1:
   resolved "https://registry.yarnpkg.com/pg-int8/-/pg-int8-1.0.1.tgz#943bd463bf5b71b4170115f80f8efc9a0c0eb78c"
   integrity sha512-WCtabS6t3c8SkpDBUlb1kjOs7l66xsGdKpIPZsg4wR+B3+u9UAum2odSsF9tnvxg80h4ZxLWMy4pRjOsFIqQpw==
 
-pg-numeric@1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/pg-numeric/-/pg-numeric-1.0.2.tgz#816d9a44026086ae8ae74839acd6a09b0636aa3a"
-  integrity sha512-BM/Thnrw5jm2kKLE5uJkXqqExRUY/toLHda65XgFTBTFYZyopbKjBe29Ii3RbkvlsMoFwD+tHeGaCjjv0gHlyw==
-
 pg-pool@^3.2.1:
   version "3.2.1"
   resolved "https://registry.yarnpkg.com/pg-pool/-/pg-pool-3.2.1.tgz#5f4afc0f58063659aeefa952d36af49fa28b30e0"
@@ -10880,18 +10872,6 @@ pg-types@^2.1.0:
     pg-int8 "1.0.1"
     postgres-array "~2.0.0"
     postgres-bytea "~1.0.0"
-    postgres-date "~1.0.4"
-    postgres-interval "^1.1.0"
-
-pg-types@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/pg-types/-/pg-types-3.0.1.tgz#90c15b1034365ff0fd9007f6ea794ec85318968d"
-  integrity sha512-Q3zN2GyDEOrc9m6lxCru9JakbdVQY5/ylKxSXI/PcIQPVRDNBR7BxdeCtxa9WI+UIoE3JNcyAffGThOxd+V/4g==
-  dependencies:
-    pg-int8 "1.0.1"
-    pg-numeric "1.0.2"
-    postgres-array "~2.0.0"
-    postgres-bytea "~3.0.0"
     postgres-date "~1.0.4"
     postgres-interval "^1.1.0"
 
@@ -11044,13 +11024,6 @@ postgres-bytea@~1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/postgres-bytea/-/postgres-bytea-1.0.0.tgz#027b533c0aa890e26d172d47cf9ccecc521acd35"
   integrity sha1-AntTPAqokOJtFy1Hz5zOzFIazTU=
-
-postgres-bytea@~3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/postgres-bytea/-/postgres-bytea-3.0.0.tgz#9048dc461ac7ba70a6a42d109221619ecd1cb089"
-  integrity sha512-CNd4jim9RFPkObHSjVHlVrxoVQXz7quwNFpz7RY1okNNme49+sVyiTvTRobiLV548Hx/hb1BG+iE7h9493WzFw==
-  dependencies:
-    obuf "~1.1.2"
 
 postgres-date@~1.0.4:
   version "1.0.4"
@@ -13623,6 +13596,11 @@ tr46@^2.0.2:
   dependencies:
     punycode "^2.1.1"
 
+tr46@~0.0.3:
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
+  integrity sha1-gYT9NH2snNwYWZLzpmIuFLnZq2o=
+
 tree-kill@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/tree-kill/-/tree-kill-1.2.2.tgz#4ca09a9092c88b73a7cdc5e8a01b507b0790a0cc"
@@ -14207,6 +14185,11 @@ wcwidth@^1.0.0:
   dependencies:
     defaults "^1.0.3"
 
+webidl-conversions@^3.0.0:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-3.0.1.tgz#24534275e2a7bc6be7bc86611cc16ae0a5654871"
+  integrity sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=
+
 webidl-conversions@^4.0.2:
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/webidl-conversions/-/webidl-conversions-4.0.2.tgz#a855980b1f0b6b359ba1d5d9fb39ae941faa63ad"
@@ -14300,6 +14283,14 @@ whatwg-mimetype@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/whatwg-mimetype/-/whatwg-mimetype-2.3.0.tgz#3d4b1e0312d2079879f826aff18dbeeca5960fbf"
   integrity sha512-M4yMwr6mAnQz76TbJm914+gPpB/nCwvZbJU28cUD6dR004SAxDLOOSUaB1JDRqLtaOV/vi0IC5lEAGFgrjGv/g==
+
+whatwg-url@^5.0.0:
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/whatwg-url/-/whatwg-url-5.0.0.tgz#966454e8765462e37644d3626f6742ce8b70965d"
+  integrity sha1-lmRU6HZUYuN2RNNib2dCzotwll0=
+  dependencies:
+    tr46 "~0.0.3"
+    webidl-conversions "^3.0.0"
 
 whatwg-url@^7.0.0:
   version "7.0.0"
