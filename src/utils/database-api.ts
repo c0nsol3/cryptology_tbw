@@ -222,7 +222,8 @@ export class DatabaseAPI {
 
                     const vote: string = DatabaseAPI.selectVote(
                         transaction.asset.votes,
-                        delegatePublicKey
+                        delegatePublicKey,
+                        delegateName
                     );
                     return {
                         height: new BigNumber(
@@ -263,13 +264,17 @@ export class DatabaseAPI {
 
     private static selectVote(
         votes: string[],
-        delegatePublicKey: string
+        delegatePublicKey: string,
+        delegateName: string,
     ): string {
         if (votes.length === 2) {
             if (votes[0].substr(1) === votes[1].substr(1)) {
                 return "";
             }
             if (votes[1].substr(1) === delegatePublicKey) {
+                return votes[1];
+            }
+            if (votes[1].substr(1) === delegateName) {
                 return votes[1];
             }
         }
