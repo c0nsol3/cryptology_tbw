@@ -97,10 +97,7 @@ export class TrueBlockWeightEngine {
             const delegatePublicKey: string = Crypto.getPublicKeyFromSeed(
                 this.config.seed
             );
-            const delegateName = await this.network.getDelegateNameForSeed(
-                this.config.seed
-            );
-                
+
             logger.info("Retrieving blocks forged by delegate.");
             const forgedBlocks: ForgedBlock[] = await this.databaseAPI.getForgedBlocks(
                 delegatePublicKey,
@@ -130,7 +127,6 @@ export class TrueBlockWeightEngine {
             logger.info("Retrieving voters.");
             const voters: Voters = await this.getVoters(
                 delegatePublicKey,
-                delegateName,
                 forgedBlocks
             );
 
@@ -191,7 +187,6 @@ export class TrueBlockWeightEngine {
                 BigNumber
             > = await this.databaseAPI.getCurrentVotersSince(
                 delegatePublicKey,
-                delegateName,
                 this.networkVersion,
                 timestamp
             );
@@ -230,7 +225,6 @@ export class TrueBlockWeightEngine {
      */
     public async getVoters(
         delegatePublicKey: string,
-        delegateName: string,
         forgedBlocks: ForgedBlock[]
     ): Promise<Voters> {
         logger.info("Retrieving current voters from API.");
@@ -248,7 +242,6 @@ export class TrueBlockWeightEngine {
         logger.info("Retrieving voter mutations.");
         const voterMutations: VoterMutation[] = await this.databaseAPI.getVoterMutations(
             delegatePublicKey,
-            delegateName,
             this.startBlockHeight,
             this.networkVersion
         );
