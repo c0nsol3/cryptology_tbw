@@ -64,13 +64,16 @@ export const getVotingDelegates = (
     return query;
 };
 
-export const getCurrentVotersSince = (delegatePublicKey: string): string => {
+export const getCurrentVotersSince = (
+    delegatePublicKey: string,
+    delegateName: string
+): string => {
     return `SELECT * FROM ( \
     SELECT DISTINCT ON (transactions."sender_public_key") transactions."sender_public_key" AS "senderPublicKey", \
     transactions."asset", transactions."timestamp" \
     FROM transactions \
     WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
-    AND transactions."asset"->>'votes' LIKE '%+${delegatePublicKey}%' \
+    AND (transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%' OR transactions."asset"->>'votes' LIKE '%${delegateName}%') 
     ORDER BY transactions."sender_public_key", transactions."timestamp" DESC ) t \
     ORDER BY t."timestamp" DESC;`;
 };
@@ -82,13 +85,14 @@ export const getCurrentVotersSince = (delegatePublicKey: string): string => {
  */
 export const getVoterSinceHeight = (
     startBlockHeight: number,
-    delegatePublicKey: string
+    delegatePublicKey: string,
+    delegateName: string
 ): string => {
     return `SELECT transactions."asset", transactions."sender_public_key" AS "senderPublicKey", \ 
           blocks."height" \
           FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
           WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
-          AND transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%'
+          AND (transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%' OR transactions."asset"->>'votes' LIKE '%${delegateName}%') 
           AND blocks.height >= ${startBlockHeight} ORDER BY blocks."height" ASC;`;
 };
 
