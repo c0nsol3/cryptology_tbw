@@ -144,13 +144,11 @@ export class DatabaseAPI {
 
     public async getCurrentVotersSince(
         delegatePublicKey: string,
-        delegateName: string,
         networkVersion: number,
         timestamp: BigNumber
     ): Promise<Map<string, BigNumber>> {
         const getCurrentVotersQuery: string = getCurrentVotersSince(
-            delegatePublicKey,
-            delegateName
+            delegatePublicKey
         );
 
         await this.psql.connect();
@@ -194,14 +192,12 @@ export class DatabaseAPI {
      */
     public async getVoterMutations(
         delegatePublicKey: string,
-        delegateName: string,
         startBlockHeight: number,
         networkVersion: number
     ): Promise<VoterMutation[]> {
         const getVoterSinceHeightQuery: string = getVoterSinceHeight(
             startBlockHeight,
-            delegatePublicKey,
-            delegateName
+            delegatePublicKey
         );
         await this.psql.connect();
         const result: Result = await this.psql.query(getVoterSinceHeightQuery);
