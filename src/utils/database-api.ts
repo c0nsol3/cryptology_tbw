@@ -144,11 +144,13 @@ export class DatabaseAPI {
 
     public async getCurrentVotersSince(
         delegatePublicKey: string,
+        delegateName: string,
         networkVersion: number,
         timestamp: BigNumber
     ): Promise<Map<string, BigNumber>> {
         const getCurrentVotersQuery: string = getCurrentVotersSince(
-            delegatePublicKey
+            delegatePublicKey,
+            delegateName
         );
 
         await this.psql.connect();
@@ -192,12 +194,14 @@ export class DatabaseAPI {
      */
     public async getVoterMutations(
         delegatePublicKey: string,
+        delegateName: string,
         startBlockHeight: number,
         networkVersion: number
     ): Promise<VoterMutation[]> {
         const getVoterSinceHeightQuery: string = getVoterSinceHeight(
             startBlockHeight,
-            delegatePublicKey
+            delegatePublicKey,
+            delegateName
         );
         await this.psql.connect();
         const result: Result = await this.psql.query(getVoterSinceHeightQuery);
@@ -218,7 +222,8 @@ export class DatabaseAPI {
 
                     const vote: string = DatabaseAPI.selectVote(
                         transaction.asset.votes,
-                        delegatePublicKey
+                        delegatePublicKey,
+                        delegateName
                     );
                     return {
                         height: new BigNumber(
@@ -259,13 +264,17 @@ export class DatabaseAPI {
 
     private static selectVote(
         votes: string[],
-        delegatePublicKey: string
+        delegatePublicKey: string,
+        delegateName: string,
     ): string {
         if (votes.length === 2) {
             if (votes[0].substr(1) === votes[1].substr(1)) {
                 return "";
             }
             if (votes[1].substr(1) === delegatePublicKey) {
+                return votes[1];
+            }
+            if (votes[1].substr(1) === delegateName) {
                 return votes[1];
             }
         }
