@@ -73,7 +73,7 @@ export const getCurrentVotersSince = (
     transactions."asset", transactions."timestamp" \
     FROM transactions \
     WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
-    AND (transactions."asset"->>'votes' LIKE '+%${delegatePublicKey}%' OR transactions."asset"->>'votes' LIKE '+%${delegateName}%') \
+    AND (transactions."asset"->>'votes' LIKE '%+${delegatePublicKey}%' OR transactions."asset"->>'votes' LIKE '%+${delegateName}%') \
     ORDER BY transactions."sender_public_key", transactions."timestamp" DESC ) t \
     ORDER BY t."timestamp" DESC;`;
 };
