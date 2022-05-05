@@ -1,6 +1,6 @@
-import { Interfaces, Managers, Transactions } from "@arkecosystem/crypto";
-import { MultiPaymentBuilder } from "@arkecosystem/crypto/dist/transactions/builders/transactions/multi-payment";
-import { TransferBuilder } from "@arkecosystem/crypto/dist/transactions/builders/transactions/transfer";
+import { Interfaces, Managers, Transactions } from "@solar-network/crypto";
+import { MultiPaymentBuilder } from "@solar-network/crypto/dist/transactions/builders/transactions/multi-payment";
+import { TransferBuilder } from "@solar-network/crypto/dist/transactions/builders/transactions/transfer";
 import BigNumber from "bignumber.js";
 import { Receiver } from "../interfaces";
 import { Config, logger, Network } from "../services";
@@ -21,7 +21,7 @@ export class TransactionEngine {
         try {
             this.config = new Config();
             this.network = new Network(this.config.server, this.config.nodes);
-        } catch (e) {
+        } catch (e: any) {
             logger.error(e.message);
             process.exit(1);
         }
@@ -110,7 +110,7 @@ export class TransactionEngine {
                 }
             }
             return transactions;
-        } catch (e) {
+        } catch (e: any) {
             logger.error(e);
             throw e;
         }
@@ -178,7 +178,7 @@ export class TransactionEngine {
      *
      */
     private async setupNetwork() {
-        const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
+        const networkConfig: Interfaces.NetworkConfig = await this.network.getNetworkConfig();
         let networkVersion: number = 88;
         if (networkConfig !== null) {
             Managers.configManager.setConfig(networkConfig);

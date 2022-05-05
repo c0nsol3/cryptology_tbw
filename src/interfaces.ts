@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 import BigNumber from "bignumber.js";
 
 export interface SmallWalletBonus {

@@ -13,7 +13,7 @@ export class ProposalEngine {
 
         try {
             this.config = new Config();
-        } catch (e) {
+        } catch (e: any) {
             logger.error(e.message);
             process.exit(1);
         }

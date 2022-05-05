@@ -24,7 +24,7 @@ export class BusinessEngine {
                 port: this.config.databasePort,
             };
             this.databaseAPI = new DatabaseAPI(databaseConfig);
-        } catch (e) {
+        } catch (e: any) {
             logger.error(e.message);
             process.exit(1);
         }

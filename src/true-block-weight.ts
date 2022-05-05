@@ -1,4 +1,4 @@
-import { Identities, Interfaces } from "@arkecosystem/crypto";
+import { Identities, Interfaces } from "@solar-network/crypto";
 import BigNumber from "bignumber.js";
 import { ARKTOSHI, PUBLICKEY, SEPARATOR } from "./constants";
 import { BroadcastResult, Payouts, Receiver, Transfers } from "./interfaces";
@@ -17,7 +17,7 @@ export class TrueBlockWeight {
             this.config = new Config();
             this.network = new Network(this.config.server, this.config.nodes);
             this.transactionEngine = new TransactionEngine();
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error.message);
             process.exit(1);
         }
@@ -28,7 +28,7 @@ export class TrueBlockWeight {
      */
     public async calculate(): Promise<Transfers> {
         try {
-            const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
+            const networkConfig: Interfaces.NetworkConfig = await this.network.getNetworkConfig();
             this.delegateName = await this.network.getDelegateNameForSeed(
                 this.config.seed
             );
@@ -177,7 +177,7 @@ export class TrueBlockWeight {
                         transactionsChunk
                     );
                     logger.info(JSON.stringify(response));
-                } catch (error) {
+                } catch (error: any) {
                     logger.error(error.message);
                 }
             }
@@ -369,7 +369,7 @@ export class TrueBlockWeight {
         }
         logger.info(`License fee prepared: ${amount.div(ARKTOSHI).toFixed(8)}`);
 
-        const networkConfig: Interfaces.INetworkConfig = await this.network.getNetworkConfig();
+        const networkConfig: Interfaces.NetworkConfig = await this.network.getNetworkConfig();
         let networkVersion: number = 88;
         if (networkConfig !== null) {
             networkVersion = networkConfig.network.pubKeyHash;

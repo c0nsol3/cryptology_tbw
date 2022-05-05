@@ -57,7 +57,7 @@
     },
     "homepage": "https://github.com/wownmedia/cryptology_tbw#readme",
     "dependencies": {
-        "@arkecosystem/crypto": "^2.6.57",
+        "@solar-network/crypto": "",
         "bytebuffer": "^5.0.1",
         "axios": "0.21.2",
         "bignumber.js": "^9.0.0",

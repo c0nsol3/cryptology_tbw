@@ -1,4 +1,4 @@
-import { Identities } from "@arkecosystem/crypto";
+import { Identities } from "@solar-network/crypto";
 
 export class Crypto {
     /**

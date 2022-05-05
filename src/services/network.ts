@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 import axios from "axios";
 import BigNumber from "bignumber.js";
 import {
@@ -24,7 +24,7 @@ export class Network {
     /**
      *
      */
-    public async getNetworkConfig(): Promise<Interfaces.INetworkConfig> {
+    public async getNetworkConfig(): Promise<Interfaces.NetworkConfig> {
         try {
             const config: APIResults = await this.getFromAPI(
                 "/api/node/configuration/crypto"

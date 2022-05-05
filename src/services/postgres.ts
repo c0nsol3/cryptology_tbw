@@ -15,7 +15,7 @@ export class Postgres {
     public async connect(): Promise<void> {
         try {
             await this.client.connect();
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
         }
     }
@@ -24,7 +24,7 @@ export class Postgres {
         try {
             await this.client.end();
             this.client = new Client(this.databaseConfig);
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
         }
     }
@@ -36,7 +36,7 @@ export class Postgres {
                 return result;
             }
             logger.warn("Query did not return results");
-        } catch (error) {
+        } catch (error: any) {
             logger.error(error);
         }
         return null;
