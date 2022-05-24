@@ -1,16 +1,5 @@
 /**
  *
- * @param tableName
- * @param columnName
- */
-export const checkColumnExists = (
-    tableName: string,
-    columnName: string
-): string =>
-    `SELECT 1 FROM information_schema.columns WHERE table_name = '${tableName}' and column_name = '${columnName}';`;
-
-/**
- *
  * @param publicKey
  * @param startBlockHeight
  * @param endBlockHeight
@@ -20,18 +9,14 @@ export const getForgedBlocks = (
     publicKey: string,
     startBlockHeight: number,
     endBlockHeight: number,
-    limit: number,
-    subtractBurnedFees: boolean
+    limit: number
 ): string => {
-    let query = `SELECT blocks.height, blocks.timestamp, blocks.reward, \
-                        ${
-                            subtractBurnedFees
-                                ? "(blocks.total_fee - blocks.burned_fee)"
-                                : "blocks.total_fee"
-                        } AS "totalFee" \
-          FROM public.blocks \
-          WHERE blocks."generator_public_key" = '${publicKey}' \
-          AND blocks.height >= ${startBlockHeight}`;
+    let query = `SELECT blocks.height, blocks.timestamp, \
+        blocks.reward, blocks.dev_fund AS "devFund", \
+        blocks.total_fee AS "totalFee", blocks.burned_fee AS "burnedFee" \
+        FROM public.blocks \
+            WHERE blocks."generator_public_key" = '${publicKey}' \
+            AND blocks.height >= ${startBlockHeight}`;
 
     if (Number.isInteger(endBlockHeight)) {
         query = `${query} AND blocks.height <= ${endBlockHeight}`;
@@ -51,7 +36,9 @@ export const getVotingDelegates = (
     startBlockHeight: number,
     endBlockHeight: number
 ): string => {
-    let query = `SELECT blocks."generator_public_key", blocks."height", blocks."total_fee", blocks."reward" \
+    let query = `SELECT blocks.generator_public_key, blocks.height, \
+          blocks.reward, blocks.dev_fund AS "devFund", \
+          blocks.total_fee AS "totalFee", blocks.burned_fee AS "burnedFee" \
           FROM blocks \
           WHERE blocks.height >= ${startBlockHeight}`;
 
@@ -88,9 +75,9 @@ export const getVoterSinceHeight = (
     delegatePublicKey: string,
     delegateName: string
 ): string => {
-    return `SELECT transactions."asset", transactions."sender_public_key" AS "senderPublicKey", \ 
+    return `SELECT transactions."asset", transactions."sender_public_key" AS "senderPublicKey", \
           blocks."height" \
-          FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
+          FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"
           WHERE transactions."type" = 3 AND transactions."type_group" = 1 \
           AND (transactions."asset"->>'votes' LIKE '%${delegatePublicKey}%' OR transactions."asset"->>'votes' LIKE '%${delegateName}%') \
           AND blocks.height >= ${startBlockHeight} ORDER BY blocks."height" ASC;`;
@@ -117,7 +104,7 @@ export const getTransactions = (
     let query = `SELECT transactions."amount", transactions."fee", transactions."recipient_id" AS "recipientId", \
           transactions."timestamp", transactions."sender_public_key" AS "senderPublicKey", \
           transactions."type", transactions."asset", blocks."height" \
-          FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
+          FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"
           WHERE blocks."height" >= ${startBlockHeight}`;
 
     if (Number.isInteger(endBlockHeight)) {
@@ -144,7 +131,7 @@ export const getDelegateTransactions = (
 ): string => {
     let query = `SELECT transactions."asset", transactions."recipient_id" AS "recipientId", transactions."timestamp", \
           transactions.type, blocks."height" \
-          FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"  
+          FROM transactions INNER JOIN blocks ON blocks."id" = transactions."block_id"
           WHERE blocks."height" >= ${startBlockHeight} \
           AND transactions."type_group" = 1 \
           AND (transactions."type" = 6 OR transactions."type" = 0)`;

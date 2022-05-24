@@ -17,7 +17,6 @@ import {
 import { logger, Postgres } from "../services";
 import { Crypto } from "./crypto";
 import {
-    checkColumnExists,
     getCurrentVotersSince,
     getDelegateTransactions,
     getForgedBlocks,
@@ -48,24 +47,14 @@ export class DatabaseAPI {
     ): Promise<ForgedBlock[]> {
         await this.psql.connect();
 
-        const checkColumnExistsQuery: string = checkColumnExists(
-            "blocks",
-            "burned_fee"
-        );
-
-        let result: Result = await this.psql.query(checkColumnExistsQuery);
-
-        const subtractBurnedFees = result.rows.length === 1;
-
         const getForgedBlocksQuery: string = getForgedBlocks(
             delegatePublicKey,
             startBlockHeight,
             endBlockHeight,
-            historyAmountBlocks,
-            subtractBurnedFees
+            historyAmountBlocks
         );
 
-        result = await this.psql.query(getForgedBlocksQuery);
+        const result: Result = await this.psql.query(getForgedBlocksQuery);
 
         await this.psql.close();
 
@@ -78,10 +67,15 @@ export class DatabaseAPI {
         const forgedBlocks: ForgedBlock[] = result.rows.map((block: Block) => {
             return {
                 height: new BigNumber(block.height).integerValue(),
-                fees: new BigNumber(block.totalFee),
+                fees: new BigNumber(block.totalFee).minus(block.burnedFee),
                 timestamp: new BigNumber(block.timestamp),
                 business: new BigNumber(0),
-                reward: new BigNumber(block.reward),
+                reward: new BigNumber(block.reward).minus(
+                    Object.values(block.devFund).reduce(
+                        (curr, prev) => curr.plus(prev),
+                        new BigNumber(0)
+                    )
+                ),
             };
         });
 
@@ -317,8 +311,17 @@ export class DatabaseAPI {
                     const block: VoterBlock = {
                         address,
                         height: parseInt(item.height, 10),
-                        fees: new BigNumber(item.total_fee),
-                        reward: new BigNumber(item.reward),
+                        fees: new BigNumber(item.totalFee).minus(
+                            item.burnedFee
+                        ),
+                        reward: new BigNumber(item.reward).minus(
+                            Object.values(
+                                item.devFund as Record<string, BigNumber>
+                            ).reduce(
+                                (curr, prev) => curr.plus(prev),
+                                new BigNumber(0)
+                            )
+                        ),
                     };
                     votingDelegateBlocks.push(block);
                 }
