@@ -1,4 +1,4 @@
-import { Identities, Interfaces } from "@arkecosystem/crypto";
+import { Identities, Interfaces } from "@solar-network/crypto";
 import BigNumber from "bignumber.js";
 import {
     DatabaseConfig,
@@ -47,7 +47,7 @@ export class TrueBlockWeightEngine {
     private readonly businessEngine: BusinessEngine;
     private startBlockHeight: number;
     private readonly endBlockHeight: number;
-    private networkConfig: Interfaces.INetworkConfig | undefined;
+    private networkConfig: Interfaces.NetworkConfig | undefined;
     private epochTimestamp: BigNumber = new BigNumber(0);
     private networkVersion: number = Number.NaN;
 

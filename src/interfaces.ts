@@ -1,4 +1,4 @@
-import { Interfaces } from "@arkecosystem/crypto";
+import { Interfaces } from "@solar-network/crypto";
 import BigNumber from "bignumber.js";
 
 export interface SmallWalletBonus {
@@ -116,8 +116,9 @@ export interface ForgedBlock {
 export interface Block {
     height: number;
     totalFee: number;
-    removedFee: number;
+    burnedFee: number;
     reward: number;
+    devFund: Record<string, BigNumber>;
     timestamp: BigNumber;
 }
 
