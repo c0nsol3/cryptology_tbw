@@ -76,6 +76,7 @@ export const getCurrentVotersSince = (
     AND ( \
         transactions."asset" @> '{"votes": ["+${delegatePublicKey}"]}' \
         OR transactions."asset" @> '{"votes": ["+${delegateName}"]}' \
+    )\
     ORDER BY transactions."sender_public_key", transactions."timestamp" DESC ) t \
     ORDER BY t."timestamp" DESC;`;
 };
